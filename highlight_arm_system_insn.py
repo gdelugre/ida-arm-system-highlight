@@ -698,7 +698,7 @@ def markup_coproc_insn(ea):
                     prev_mnem = GetMnem(ea)
                     if prev_mnem in ("LDR", "MOV", "ORR", "BIC") and GetOpnd(ea, 0) == reg:
                         if prev_mnem == "LDR" and GetOpnd(ea, 1)[0] == "=":
-                            bits = extract_bits(fields, int(GetOpnd(ea, 1)[1:], 16))
+                            bits = extract_bits(fields, Dword(GetOperandValue(ea, 1)))
                             MakeComm(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
                             break
                         elif prev_mnem[0:3]  == "MOV" and GetOpnd(ea, 1)[0] == "#":
@@ -711,6 +711,8 @@ def markup_coproc_insn(ea):
                         elif prev_mnem[0:3] == "BIC"  and GetOpnd(ea, 2)[0] == "#":
                             bits = extract_bits(fields, GetOperandValue(ea, 2))
                             MakeComm(ea, "Clear bit %s" % ", ".join([name for (abbrev,name) in bits]))
+                        else:
+                            break
                     else:
                         break
     else:
