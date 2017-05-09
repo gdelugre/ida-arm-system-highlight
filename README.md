@@ -1,4 +1,4 @@
-## Decoding system instructions
+## Decoding ARM system instructions
 
 This script will give you the list of ARM system instructions used in your IDA
 database. This is useful for locating specific low-level pieces of code
