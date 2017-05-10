@@ -98,8 +98,7 @@ COPROC_REGISTERS = {
 
         # Translation Table Base Registers
         ( "p15", "c2", 0, "c0", 0 ) : ( "TTBR0", "Translation Table Base Register 0" ),
-        ( "p15", "c2", 0, "c0", 1 ) : ( "TTBR0", "Translation Table Base Register 1" ),
-        ( "p15", "c2", 0, "c0", 2 ) : ( "TTBR0", "Translation Table Base Register 2" ),
+        ( "p15", "c2", 0, "c0", 1 ) : ( "TTBR1", "Translation Table Base Register 1" ),
         ( "p15", "c2", 4, "c0", 2 ) : ( "HTCR", "Hyp Translation Control Register" ),
         ( "p15", "c2", 4, "c1", 2 ) : ( "VTCR", "Virtualization Translation Control Register" ),
 
