@@ -45,6 +45,34 @@ SYSTEM_INSN = (
     "ERET", # Aarch64
 )
 
+# Extracted from the 00bet3.2 XML specifications for ARMv8.2.
+COPROC_REGISTERS_64 = {
+        # MMU registers
+        ( "p15", 0, "c2" )          : ( "TTBR0", "Translation Table Base Register 0" ),
+        ( "p15", 1, "c2"  )         : ( "TTBR1", "Translation Table Base Register 1" ),
+        ( "p15", 6, "c2" )          : ( "VTTBR", "Virtualization Translation Table Base Register" ),
+        ( "p15", 4, "c2" )          : ( "HTTBR", "Hyp Translation Table Base Register" ),
+        ( "p15", 0, "c7"  )         : ( "PAR", "Physical Address Register" ),
+
+        # Counters
+        ( "p15", 0, "c9"  )         : ( "PMCCNTR", "Performance Monitors Cycle Count Register" ),
+        ( "p15", 0, "c14" )         : ( "CNTPCT", "Counter-timer Physical Count register" ),
+        ( "p15", 1, "c14" )         : ( "CNTVCT", "Counter-timer Virtual Count register" ),
+        ( "p15", 2, "c14" )         : ( "CNTHP_CVAL", "Counter-timer Hyp Physical CompareValue register" ),
+        ( "p15", 3, "c14" )         : ( "CNTV_CVAL", "Counter-timer Virtual Timer CompareValue register" ),
+        ( "p15", 4, "c14" )         : ( "CNTVOFF", "Counter-timer Virtual Offset register" ),
+        ( "p15", 6, "c14" )         : ( "CNTHP_CVAL", "Counter-timer Hyp Physical CompareValue register" ),
+
+        # Interrupts
+        ( "p15", 0, "c12" )         : ( "ICC_SGI1R", "Interrupt Controller Software Generated Interrupt Group 1 Register" ),
+        ( "p15", 1, "c12" )         : ( "ICC_ASGI1R", "Interrupt Controller Alias Software Generated Interrupt Group 1 Register" ),
+        ( "p15", 2, "c12" )         : ( "ICC_SGI0R", "Interrupt Controller Software Generated Interrupt Group 0 Register" ),
+
+        # Debug registers
+        ( "p14", 0, "c1"  )         : ( "DBGDRAR", "Debug ROM Address Register" ),
+        ( "p14", 0, "c2"  )         : ( "DBGDSAR", "Debug Self Address Register" ),
+}
+
 # Taken from the Cortex-A15 manual.
 COPROC_REGISTERS = {
         ( "p15", "c0", 0, "c0", 0 ) : ( "MIDR", "Main ID Register" ),
@@ -673,6 +701,23 @@ def is_system_insn(ea):
         if mnem == "SUBS" and GetOpnd(ea, 0) == "PC":
             return True
     return False
+
+def markup_coproc_reg64_insn(ea):
+    if GetMnem(ea)[1] == "R":
+        direction = '<'
+    else:
+        direction = '>'
+    op1 = GetOperandValue(ea, 0)
+    cp = "p%d" % DecodeInstruction(ea).Op1.specflag1
+    reg1, reg2, crm = GetOpnd(ea, 1).split(',')
+    sig = ( cp, op1, crm )
+    desc = COPROC_REGISTERS_64.get(sig, None)
+    if desc:
+        print("Identified as '%s'" % desc[1])
+        MakeComm(ea, "[%s] %s (%s)" % (direction, desc[1], desc[0]))
+    else:
+        print("Cannot identify coprocessor register.")
+        MakeComm(ea, "[%s] Unknown coprocessor register." % direction)
     
 def markup_coproc_insn(ea):
     if GetMnem(ea)[1] == "R":
@@ -754,7 +799,9 @@ def markup_aarch64_sys_insn(ea):
 
 def markup_system_insn(ea):
     mnem = GetMnem(ea)
-    if mnem[0:3] in ("MRC", "MCR"):
+    if mnem[0:4] in ("MRRC", "MCRR"):
+        markup_coproc_reg64_insn(ea)
+    elif mnem[0:3] in ("MRC", "MCR"):
         markup_coproc_insn(ea)
     elif current_arch == 'aarch32' and mnem[0:3] == "MSR":
         markup_psr_insn(ea)
