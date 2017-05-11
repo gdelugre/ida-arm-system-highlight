@@ -48,10 +48,10 @@ SYSTEM_INSN = (
 # Extracted from the 00bet3.2 XML specifications for ARMv8.2.
 COPROC_REGISTERS_64 = {
         # MMU registers
-        ( "p15", 0, "c2" )          : ( "TTBR0", "Translation Table Base Register 0" ),
+        ( "p15", 0, "c2"  )         : ( "TTBR0", "Translation Table Base Register 0" ),
         ( "p15", 1, "c2"  )         : ( "TTBR1", "Translation Table Base Register 1" ),
-        ( "p15", 6, "c2" )          : ( "VTTBR", "Virtualization Translation Table Base Register" ),
-        ( "p15", 4, "c2" )          : ( "HTTBR", "Hyp Translation Table Base Register" ),
+        ( "p15", 6, "c2"  )         : ( "VTTBR", "Virtualization Translation Table Base Register" ),
+        ( "p15", 4, "c2"  )         : ( "HTTBR", "Hyp Translation Table Base Register" ),
         ( "p15", 0, "c7"  )         : ( "PAR", "Physical Address Register" ),
 
         # Counters
