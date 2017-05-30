@@ -698,7 +698,7 @@ def is_system_insn(ea):
             return True
         if mnem[0:3] == "LDM" and GetOpnd(ea, 1)[-1:] == "^":
             return True
-        if mnem == "SUBS" and GetOpnd(ea, 0) == "PC":
+        if mnem in ("SUBS", "MOVS") and GetOpnd(ea, 0) == "PC" and GetOpnd(ea, 1) == "LR":
             return True
     return False
 
