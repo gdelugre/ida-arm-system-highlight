@@ -860,12 +860,8 @@ ARM_MODES = {
 }
 
 
-def extract_bits(bitmap, field):
-    bits = []
-    for b in bitmap:
-        if field & (1 << b) != 0:
-            bits.append(bitmap[b])
-    return bits
+def extract_bits(bitmap, value):
+    return [ bitmap[b] for b in bitmap if value & (1 << b) ]
 
 def is_system_insn(ea):
     mnem = GetMnem(ea)
