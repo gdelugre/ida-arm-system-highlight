@@ -776,24 +776,75 @@ SYSTEM_REGISTERS = {
         ( 0b011, 0b100, "c12", "c11", 0b001 ) : ( "ICH_VTR_EL2", "Interrupt Controller VGIC Type Register" ),
 }
 
+# Aarch32 fields.
 COPROC_FIELDS = {
+        "SCR" : {
+            0 : ( "NS", "Non-secure" ),
+            1 : ( "IRQ", "IRQ handler" ),
+            2 : ( "FIQ", "FIQ handler" ),
+            3 : ( "EA", "External Abort handler" ),
+            4 : ( "FW", "Can mask Non-secure FIQ" ),
+            5 : ( "AW", "Can mask Non-secure external aborts" ),
+            6 : ( "nET", "Not Early Termination" ),
+            7 : ( "SCD", "Secure Monitor Call disable" ),
+            8 : ( "HCE", "Hypervisor Call instruction enable" ),
+            9 : ( "SIF", "Secure instruction fetch" ),
+            12 : ( "TWI", "Traps WFI instructions to Monitor mode" ),
+            13 : ( "TWE", "Traps WFE instructions to Monitor mode" ),
+            15 : ( "TERR", "Trap Error record accesses" )
+        },
         "SCTLR" : {
             0 : ( "M", "MMU Enable" ),
             1 : ( "A", "Alignment" ),
             2 : ( "C", "Cache Enable" ),
+            3 : ( "nTLSMD", "No Trap Load Multiple and Store Multiple to Device-nGRE/Device-nGnRE/Device-nGnRnE memory" ),
+            4 : ( "LSMAOE", "Load Multiple and Store Multiple Atomicity and Ordering Enable" ),
+            5 : ( "CP15BEN", "System instruction memory barrier enable" ),
+            7 : ( "ITD", "IT Disable" ),
+            8 : ( "SETEND", "SETEND instruction disable" ),
             10 : ( "SW", "SWP/SWPB Enable" ),
             11 : ( "Z", "Branch Prediction Enable" ),
             12 : ( "I", "Instruction cache Enable" ),
             13 : ( "V", "High exception vectors" ),
             14 : ( "RR", "Round-robin cache" ),
+            16 : ( "nTWI", "Traps EL0 execution of WFI instructions to Undefined mode" ),
             17 : ( "HA", "Hardware Access Enable" ),
+            18 : ( "nTWE", "Traps EL0 execution of WFE instructions to Undefined mode" ),
+            19 : ( "WXN", "Write permission implies XN" ),
+            20 : ( "UWXN", "Unprivileged write permission implies PL1 XN" ),
             21 : ( "FI", "Fast Interrupts configuration" ),
+            23 : ( "SPAN", "Set Privileged Access Never" ),
             24 : ( "VE", "Interrupt Vectors Enable" ),
             25 : ( "EE", "Exception Endianness" ),
             27 : ( "NMFI", "Non-maskable Fast Interrupts" ),
             28 : ( "TRE", "TEX Remap Enable" ),
             29 : ( "AFE", "Access Flag Enable" ),
             30 : ( "TE", "Thumb Exception Enable" )
+        }
+}
+
+# Aarch64 fields.
+SYSREG_FIELDS = {
+        "DAIF" : {
+            6 : ( "F", "FIQ mask" ),
+            7 : ( "I", "IRQ mask" ),
+            8 : ( "A", "SError interrupt mask" ),
+            9 : ( "D", "Process state D mask" )
+        },
+        "SCR_EL3" : {
+            0 : ( "NS", "Non-secure" ),
+            1 : ( "IRQ", "IRQ handler" ),
+            2 : ( "FIQ", "FIQ handler" ),
+            3 : ( "EA", "External Abort handler" ),
+            7 : ( "SMD", "Secure Monitor Call disable" ),
+            8 : ( "HCE", "Hypervisor Call instruction enable" ),
+            9 : ( "SIF", "Secure instruction fetch" ),
+            10 : ( "RW", "Lower level is AArch64" ),
+            11 : ( "ST", "Traps Secure EL1 accesses to the Counter-timer Physical Secure timer registers to EL3, from AArch64 state only." ),
+            12 : ( "TWI", "Traps WFI instructions to Monitor mode" ),
+            13 : ( "TWE", "Traps WFE instructions to Monitor mode" ),
+            14 : ( "TLOR", "Traps LOR registers" ),
+            15 : ( "TERR", "Trap Error record accesses" )
         }
 }
 
@@ -827,6 +878,30 @@ def is_system_insn(ea):
             return True
     return False
 
+def backtrack_fields(ea, reg, fields):
+    while True:
+        ea -= 4
+        prev_mnem = GetMnem(ea)[0:3]
+        if prev_mnem in ("LDR", "MOV", "ORR", "BIC") and GetOpnd(ea, 0) == reg:
+            if prev_mnem == "LDR" and GetOpnd(ea, 1)[0] == "=":
+                bits = extract_bits(fields, Dword(GetOperandValue(ea, 1)))
+                MakeComm(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
+                break
+            elif prev_mnem == "MOV" and GetOpnd(ea, 1)[0] == "#":
+                bits = extract_bits(fields, GetOperandValue(ea, 1))
+                MakeComm(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
+                break
+            elif prev_mnem == "ORR"  and GetOpnd(ea, 2)[0] == "#":
+                bits = extract_bits(fields, GetOperandValue(ea, 2))
+                MakeComm(ea, "Set bit %s" % ", ".join([name for (abbrev,name) in bits]))
+            elif prev_mnem == "BIC"  and GetOpnd(ea, 2)[0] == "#":
+                bits = extract_bits(fields, GetOperandValue(ea, 2))
+                MakeComm(ea, "Clear bit %s" % ", ".join([name for (abbrev,name) in bits]))
+            else:
+                break
+        else:
+            break
+
 def markup_coproc_reg64_insn(ea):
     if GetMnem(ea)[1] == "R":
         direction = '<'
@@ -858,32 +933,11 @@ def markup_coproc_insn(ea):
         print("Identified as '%s'" % desc[1])
         MakeComm(ea, "[%s] %s (%s)" % (direction, desc[1], desc[0]))
        
-        # Try to resolve fields at a write operation
+        # Try to resolve fields during a write operation
         if direction == '>':
             fields = COPROC_FIELDS.get(desc[0], None)
             if fields:
-                while True:
-                    ea -= 4
-                    prev_mnem = GetMnem(ea)
-                    if prev_mnem in ("LDR", "MOV", "ORR", "BIC") and GetOpnd(ea, 0) == reg:
-                        if prev_mnem == "LDR" and GetOpnd(ea, 1)[0] == "=":
-                            bits = extract_bits(fields, Dword(GetOperandValue(ea, 1)))
-                            MakeComm(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
-                            break
-                        elif prev_mnem[0:3]  == "MOV" and GetOpnd(ea, 1)[0] == "#":
-                            bits = extract_bits(fields, GetOperandValue(ea, 1))
-                            MakeComm(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
-                            break
-                        elif prev_mnem[0:3] == "ORR"  and GetOpnd(ea, 2)[0] == "#":
-                            bits = extract_bits(fields, GetOperandValue(ea, 2))
-                            MakeComm(ea, "Set bit %s" % ", ".join([name for (abbrev,name) in bits]))
-                        elif prev_mnem[0:3] == "BIC"  and GetOpnd(ea, 2)[0] == "#":
-                            bits = extract_bits(fields, GetOperandValue(ea, 2))
-                            MakeComm(ea, "Clear bit %s" % ", ".join([name for (abbrev,name) in bits]))
-                        else:
-                            break
-                    else:
-                        break
+                backtrack_fields(ea, reg, fields)
     else:
         print("Cannot identify coprocessor register.")
         MakeComm(ea, "[%s] Unknown coprocessor register." % direction)
@@ -911,13 +965,19 @@ def markup_aarch64_sys_insn(ea):
     op0 = 2 + ((Dword(ea) >> 19) & 1)
     op1, op2 = GetOperandValue(ea, base_args), GetOperandValue(ea, base_args + 3)
     crn, crm = GetOpnd(ea, base_args + 1), GetOpnd(ea, base_args + 2)
+    reg = GetOpnd(ea, reg_pos)
 
     sig = ( op0, op1, crn, crm, op2 )
     desc = SYSTEM_REGISTERS.get(sig, None)
     if desc:
         print("Identified as '%s'" % desc[1])
         MakeComm(ea, "[%s] %s (%s)" % (direction, desc[1], desc[0]))
-        # TODO: backtrack bitfields
+
+        # Try to resolve fields during a write operation.
+        if direction == '>':
+            fields = SYSREG_FIELDS.get(desc[0], None)
+            if fields:
+                backtrack_fields(ea, reg, fields)
     else:
         print("Cannot identify system register")
         MakeComm(ea, "[%s] Unknown system register." % direction)
