@@ -45,6 +45,7 @@ SYSTEM_INSN = (
     "ERET", # Aarch64
 )
 
+# 64 bits registers accessible from AArch32.
 # Extracted from the 00bet3.2 XML specifications for ARMv8.2.
 COPROC_REGISTERS_64 = {
         # MMU registers
@@ -859,7 +860,17 @@ COPROC_FIELDS = {
             28 : ( "TRE", "TEX Remap Enable" ),
             29 : ( "AFE", "Access Flag Enable" ),
             30 : ( "TE", "Thumb Exception Enable" )
-        }
+        },
+        "HSCTLR" : {
+            0 : ( "M", "MMU Enable" ),
+            1 : ( "A", "Alignment" ),
+            2 : ( "C", "Cache Enable" ),
+            3 : ( "SA", "Stack alignment check" ),
+            12 : ( "I", "Instruction cache Enable" ),
+            19 : ( "WXN", "Write permission implies XN" ),
+            25 : ( "EE", "Exception Endianness" ),
+            30 : ( "TE", "Thumb Exception Enable" )
+        },
 }
 
 # Aarch64 fields.
