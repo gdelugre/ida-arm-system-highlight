@@ -845,7 +845,46 @@ SYSREG_FIELDS = {
             13 : ( "TWE", "Traps WFE instructions to Monitor mode" ),
             14 : ( "TLOR", "Traps LOR registers" ),
             15 : ( "TERR", "Trap Error record accesses" )
-        }
+        },
+        "SCTLR_EL1" : {
+            0 : ( "M", "MMU Enable" ),
+            1 : ( "A", "Alignment" ),
+            2 : ( "C", "Cache Enable" ),
+            3 : ( "SA", "Stack alignment check" ),
+            4 : ( "SA0", "Stack alignment check for EL0" ),
+            5 : ( "CP15BEN", "System instruction memory barrier enable" ),
+            6 : ( "THEE", "T32EE enable" ),
+            7 : ( "ITD", "IT Disable" ),
+            8 : ( "SED", "SETEND instruction disable" ),
+            9 : ( "UMA", "User Mask Access" ),
+            12 : ( "I", "Instruction cache Enable" ),
+            14 : ( "DZE", "Access to DC ZVA instruction at EL0" ),
+            15 : ( "UCT", "Access to CTR_EL0 to EL0" ),
+            16 : ( "nTWI", "Traps EL0 execution of WFI instructions to Undefined mode" ),
+            18 : ( "nTWE", "Traps EL0 execution of WFE instructions to Undefined mode" ),
+            19 : ( "WXN", "Write permission implies XN" ),
+            24 : ( "E0E", "Endianess of explicit data accesses at EL0" ),
+            25 : ( "EE", "Exception Endianness" ),
+            26 : ( "UCI", "Enable EL0 access to DC CVAU, DC CIVAC, DC CVAC and DC IVAU instructions" ),
+        },
+        "SCTLR_EL2" : {
+            0 : ( "M", "MMU Enable" ),
+            1 : ( "A", "Alignment" ),
+            2 : ( "C", "Cache Enable" ),
+            3 : ( "SA", "Stack alignment check" ),
+            12 : ( "I", "Instruction cache Enable" ),
+            19 : ( "WXN", "Write permission implies XN" ),
+            25 : ( "EE", "Exception Endianness" ),
+        },
+        "SCTLR_EL3" : {
+            0 : ( "M", "MMU Enable" ),
+            1 : ( "A", "Alignment" ),
+            2 : ( "C", "Cache Enable" ),
+            3 : ( "SA", "Stack alignment check" ),
+            12 : ( "I", "Instruction cache Enable" ),
+            19 : ( "WXN", "Write permission implies XN" ),
+            25 : ( "EE", "Exception Endianness" ),
+        },
 }
 
 ARM_MODES = {
