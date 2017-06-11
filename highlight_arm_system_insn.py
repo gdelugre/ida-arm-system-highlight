@@ -13,7 +13,7 @@ from idc import *
 
 global current_arch
 
-SYSTEM_INSN = ( 
+SYSTEM_INSN = (
     # CPSR access
     "MSR", "MRS", "CPSIE", "CPSID",
 
@@ -302,7 +302,7 @@ COPROC_REGISTERS = {
         ( "p15", "c15", 3, "c0", 1) : ( "N/A", "Instruction Debug Cache" ), # ARM11
         ( "p15", "c15", 3, "c2", 0) : ( "N/A", "Data Tag RAM Read Operation" ), # ARM11
         ( "p15", "c15", 3, "c2", 1) : ( "N/A", "Instruction Tag RAM Read Operation" ), # ARM11
-        ( "p15", "c15", 4, "c0", 0) : ( "CBAR", "Configuration Base Address Register" ), 
+        ( "p15", "c15", 4, "c0", 0) : ( "CBAR", "Configuration Base Address Register" ),
         ( "p15", "c15", 5, "c4", 0) : ( "N/A", "Data MicroTLB Index" ), # ARM11
         ( "p15", "c15", 5, "c4", 1) : ( "N/A", "Instruction MicroTLB Index" ), # ARM11
         ( "p15", "c15", 5, "c4", 2) : ( "N/A", "Read Main TLB Entry" ), # ARM11
@@ -1027,45 +1027,60 @@ def backtrack_fields(ea, reg, fields):
         else:
             break
 
+def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields = {}):
+    desc = known_regs.get(sig, None)
+    if desc:
+        print("Identified as '%s'" % desc[1])
+        MakeComm(ea, "[%s] %s (%s)" % (access, desc[1], desc[0]))
+
+        # Try to resolve fields during a write operation
+        if access == '>':
+            fields = known_fields.get(desc[0], None)
+            if fields:
+                backtrack_fields(ea, cpu_reg, fields)
+    else:
+        print("Cannot identify system register.")
+        MakeComm(ea, "[%s] Unknown system register." % access)
+
 def markup_coproc_reg64_insn(ea):
     if GetMnem(ea)[1] == "R":
-        direction = '<'
+        access = '<'
     else:
-        direction = '>'
+        access = '>'
     op1 = GetOperandValue(ea, 0)
     cp = "p%d" % DecodeInstruction(ea).Op1.specflag1
     reg1, reg2, crm = GetOpnd(ea, 1).split(',')
+
     sig = ( cp, op1, crm )
-    desc = COPROC_REGISTERS_64.get(sig, None)
-    if desc:
-        print("Identified as '%s'" % desc[1])
-        MakeComm(ea, "[%s] %s (%s)" % (direction, desc[1], desc[0]))
-    else:
-        print("Cannot identify coprocessor register.")
-        MakeComm(ea, "[%s] Unknown coprocessor register." % direction)
-    
+    identify_register(ea, access, sig, COPROC_REGISTERS_64)
+
 def markup_coproc_insn(ea):
     if GetMnem(ea)[1] == "R":
-        direction = '<'
+        access = '<'
     else:
-        direction = '>'
+        access = '>'
     op1, op2 = GetOperandValue(ea, 0), GetOperandValue(ea, 2)
     reg, crn, crm = GetOpnd(ea, 1).split(',')
     cp = "p%d" % DecodeInstruction(ea).Op1.specflag1
-    sig = ( cp, crn, op1, crm, op2 ) 
-    desc = COPROC_REGISTERS.get(sig, None)
-    if desc:
-        print("Identified as '%s'" % desc[1])
-        MakeComm(ea, "[%s] %s (%s)" % (direction, desc[1], desc[0]))
-       
-        # Try to resolve fields during a write operation
-        if direction == '>':
-            fields = COPROC_FIELDS.get(desc[0], None)
-            if fields:
-                backtrack_fields(ea, reg, fields)
+
+    sig = ( cp, crn, op1, crm, op2 )
+    identify_register(ea, access, sig, COPROC_REGISTERS, reg, COPROC_FIELDS)
+
+def markup_aarch64_sys_insn(ea):
+    if GetMnem(ea)[1] == "R":
+        reg_pos = 0
+        access = '<'
     else:
-        print("Cannot identify coprocessor register.")
-        MakeComm(ea, "[%s] Unknown coprocessor register." % direction)
+        reg_pos = 4
+        access = '>'
+    base_args = (reg_pos + 1) % 5
+    op0 = 2 + ((Dword(ea) >> 19) & 1)
+    op1, op2 = GetOperandValue(ea, base_args), GetOperandValue(ea, base_args + 3)
+    crn, crm = GetOpnd(ea, base_args + 1), GetOpnd(ea, base_args + 2)
+    reg = GetOpnd(ea, reg_pos)
+
+    sig = ( op0, op1, crn, crm, op2 )
+    identify_register(ea, access, sig, SYSTEM_REGISTERS, reg, SYSREG_FIELDS)
 
 def markup_psr_insn(ea):
     if GetOpnd(ea,1)[0] == "#": # immediate
@@ -1076,37 +1091,7 @@ def markup_psr_insn(ea):
         i = (psr & (1 << 7)) and 'I' or '-'
         f = (psr & (1 << 6)) and 'F' or '-'
         t = (psr & (1 << 5)) and 'T' or '-'
-        MakeComm(ea, "Set CPSR [%c%c%c%c%c], Mode: %s" % (e,a,i,f,t,mode)) 
-
-def markup_aarch64_sys_insn(ea):
-    if GetMnem(ea)[1] == "R":
-        reg_pos = 0
-        direction = '<'
-    else:
-        reg_pos = 4
-        direction = '>'
-
-    base_args = (reg_pos + 1) % 5
-    op0 = 2 + ((Dword(ea) >> 19) & 1)
-    op1, op2 = GetOperandValue(ea, base_args), GetOperandValue(ea, base_args + 3)
-    crn, crm = GetOpnd(ea, base_args + 1), GetOpnd(ea, base_args + 2)
-    reg = GetOpnd(ea, reg_pos)
-
-    sig = ( op0, op1, crn, crm, op2 )
-    desc = SYSTEM_REGISTERS.get(sig, None)
-    if desc:
-        print("Identified as '%s'" % desc[1])
-        MakeComm(ea, "[%s] %s (%s)" % (direction, desc[1], desc[0]))
-
-        # Try to resolve fields during a write operation.
-        if direction == '>':
-            fields = SYSREG_FIELDS.get(desc[0], None)
-            if fields:
-                backtrack_fields(ea, reg, fields)
-    else:
-        print("Cannot identify system register")
-        MakeComm(ea, "[%s] Unknown system register." % direction)
-
+        MakeComm(ea, "Set CPSR [%c%c%c%c%c], Mode: %s" % (e,a,i,f,t,mode))
 
 def markup_system_insn(ea):
     mnem = GetMnem(ea)
