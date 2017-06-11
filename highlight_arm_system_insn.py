@@ -517,7 +517,8 @@ SYSTEM_REGISTERS = {
         ( 0b010, 0b000, "c0", "c3", 0b010 )   : ( "OSDTRTX_EL1", "OS Lock Data Transfer Register, Transmit" ),
         ( 0b010, 0b000, "c0", "c6", 0b010 )   : ( "OSECCR_EL1", "OS Lock Exception Catch Control Register" ),
         ( 0b010, 0b011, "c0", "c4", 0b000 )   : ( "DBGDTR_EL0", "Debug Data Transfer Register, half-duplex" ),
-        ( 0b010, 0b011, "c0", "c5", 0b000 )   : ( "DBGDTRTX_EL0", "Debug Data Transfer Register, Transmit" ),
+        ( 0b010, 0b011, "c0", "c5", 0b000 )   : ( "DBGDTRTX_EL0", "Debug Data Transfer Register, Transmit",
+                                                  "DBGDTRRX_EL0", "Debug Data Transfer Register, Receive" ),
         ( 0b010, 0b100, "c0", "c7", 0b000 )   : ( "DBGVCR32_EL2", "Debug Vector Catch Register" ),
         ( 0b010, 0b000, "c0", "c0", 0b100 )   : ( "DBGBVR0_EL1", "Debug Breakpoint Value Register 0" ),
         ( 0b010, 0b000, "c0", "c1", 0b100 )   : ( "DBGBVR1_EL1", "Debug Breakpoint Value Register 1" ),
@@ -1030,11 +1031,12 @@ def backtrack_fields(ea, reg, fields):
 def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields = {}):
     desc = known_regs.get(sig, None)
     if desc:
-        print("Identified as '%s'" % desc[1])
-        MakeComm(ea, "[%s] %s (%s)" % (access, desc[1], desc[0]))
+        cmt = ("[%s] " + "\n or ".join(["%s (%s)"] * (len(desc) / 2))) % ((access,) + desc)
+        MakeComm(ea, cmt)
+        print(cmt)
 
-        # Try to resolve fields during a write operation
-        if access == '>':
+        # Try to resolve fields during a write operation.
+        if access == '>' and len(desc) == 2:
             fields = known_fields.get(desc[0], None)
             if fields:
                 backtrack_fields(ea, cpu_reg, fields)
