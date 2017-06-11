@@ -59,8 +59,10 @@ COPROC_REGISTERS_64 = {
         ( "p15", 0, "c9"  )         : ( "PMCCNTR", "Performance Monitors Cycle Count Register" ),
         ( "p15", 0, "c14" )         : ( "CNTPCT", "Counter-timer Physical Count register" ),
         ( "p15", 1, "c14" )         : ( "CNTVCT", "Counter-timer Virtual Count register" ),
-        ( "p15", 2, "c14" )         : ( "CNTHP_CVAL", "Counter-timer Hyp Physical CompareValue register" ),
-        ( "p15", 3, "c14" )         : ( "CNTV_CVAL", "Counter-timer Virtual Timer CompareValue register" ),
+        ( "p15", 2, "c14" )         : ( "CNTP_CVAL", "Counter-timer Physical Timer CompareValue register",
+                                        "CNTHP_CVAL", "Counter-timer Hyp Physical CompareValue register" ),
+        ( "p15", 3, "c14" )         : ( "CNTV_CVAL", "Counter-timer Virtual Timer CompareValue register", 
+                                        "CNTHV_CVAL", "Counter-timer Virtual Timer CompareValue register (EL2)" ),
         ( "p15", 4, "c14" )         : ( "CNTVOFF", "Counter-timer Virtual Offset register" ),
         ( "p15", 6, "c14" )         : ( "CNTHP_CVAL", "Counter-timer Hyp Physical CompareValue register" ),
 
