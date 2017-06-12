@@ -1008,7 +1008,7 @@ def is_system_insn(ea):
 
 def backtrack_fields(ea, reg, fields):
     while True:
-        ea -= 4
+        ea -= ItemSize(ea)
         prev_mnem = GetMnem(ea)[0:3]
         if prev_mnem in ("LDR", "MOV", "ORR", "BIC") and GetOpnd(ea, 0) == reg:
             if prev_mnem == "LDR" and GetOpnd(ea, 1)[0] == "=":
