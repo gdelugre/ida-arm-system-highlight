@@ -98,6 +98,7 @@ COPROC_REGISTERS = {
         ( "p15", "c0", 0, "c1", 5 )  : ( "ID_MMFR1", "Memory Model Feature Register 1" ),
         ( "p15", "c0", 0, "c1", 6 )  : ( "ID_MMFR2", "Memory Model Feature Register 2" ),
         ( "p15", "c0", 0, "c1", 7 )  : ( "ID_MMFR3", "Memory Model Feature Register 3" ),
+        ( "p15", "c0", 0, "c2", 6 )  : ( "ID_MMFR4", "Memory Model Feature Register 4" ),
         ( "p15", "c0", 0, "c2", 0 )  : ( "ID_ISAR0", "Instruction Set Attribute Register 0" ),
         ( "p15", "c0", 0, "c2", 1 )  : ( "ID_ISAR1", "Instruction Set Attribute Register 1" ),
         ( "p15", "c0", 0, "c2", 2 )  : ( "ID_ISAR2", "Instruction Set Attribute Register 2" ),
@@ -115,13 +116,17 @@ COPROC_REGISTERS = {
         # System control registers
         ( "p15", "c1", 0, "c0", 0 )  : ( "SCTLR", "System Control Register" ),
         ( "p15", "c1", 0, "c0", 1 )  : ( "ACTLR", "Auxiliary Control Register" ),
+        ( "p15", "c1", 0, "c0", 3 )  : ( "ACTLR2", "Auxiliary Control Register 2" ),
         ( "p15", "c1", 0, "c0", 2 )  : ( "CPACR", "Architectural Feature Access Control Register" ),
         ( "p15", "c1", 0, "c1", 0 )  : ( "SCR", "Secure Configuration Register" ),
         ( "p15", "c1", 0, "c1", 1 )  : ( "SDER", "Secure Debug Enable Register" ),
+        ( "p15", "c1", 0, "c3", 1 )  : ( "SDCR", "Secure Debug Control Register" ),
         ( "p15", "c1", 0, "c1", 2 )  : ( "NSACR", "Non-Secure Access Control Register" ),
         ( "p15", "c1", 4, "c0", 0 )  : ( "HSCTLR", "Hyp System Control Register" ),
         ( "p15", "c1", 4, "c0", 1 )  : ( "HACTLR", "Hyp Auxiliary Control Register" ),
+        ( "p15", "c1", 4, "c0", 3 )  : ( "HACTLR2", "Hyp Auxiliary Control Register 2" ),
         ( "p15", "c1", 4, "c1", 0 )  : ( "HCR", "Hyp Configuration Register" ),
+        ( "p15", "c1", 4, "c1", 4 )  : ( "HCR2", "Hyp Configuration Register 2" ),
         ( "p15", "c1", 4, "c1", 1 )  : ( "HDCR", "Hyp Debug Control Register" ),
         ( "p15", "c1", 4, "c1", 2 )  : ( "HCPTR", "Hyp Architectural Feature Trap Register" ),
         ( "p15", "c1", 4, "c1", 3 )  : ( "HSTR", "Hyp System Trap Register" ),
@@ -132,6 +137,8 @@ COPROC_REGISTERS = {
         ( "p15", "c2", 0, "c0", 1 )  : ( "TTBR1", "Translation Table Base Register 1" ),
         ( "p15", "c2", 4, "c0", 2 )  : ( "HTCR", "Hyp Translation Control Register" ),
         ( "p15", "c2", 4, "c1", 2 )  : ( "VTCR", "Virtualization Translation Control Register" ),
+        ( "p15", "c2", 0, "c0", 2 )  : ( "TTBCR", "Translation Table Base Control Register" ),
+        ( "p15", "c2", 0, "c0", 3 )  : ( "TTBCR2", "Translation Table Base Control Register 2" ),
 
         # Domain Access Control registers
         ( "p15", "c3", 0, "c0", 0 )  : ( "DACR", "Domain Access Control Register" ),
@@ -176,6 +183,8 @@ COPROC_REGISTERS = {
         ( "p15", "c7", 0, "c8", 5 )  : ( "ATS12NSOPW", "Address Translate Stages 1 and 2 Non-secure Only PL1 Write" ),
         ( "p15", "c7", 0, "c8", 6 )  : ( "ATS12NSOUR", "Address Translate Stages 1 and 2 Non-secure Only Unprivileged Read" ),
         ( "p15", "c7", 0, "c8", 7 )  : ( "ATS12NSOUW", "Address Translate Stages 1 and 2 Non-secure Only Unprivileged Write" ),
+        ( "p15", "c7", 0, "c9", 0 )  : ( "ATS1CPRP", "Address Translate Stage 1 Current state PL1 Read PAN" ),
+        ( "p15", "c7", 0, "c9", 1 )  : ( "ATS1CPWP", "Address Translate Stage 1 Current state PL1 Write PAN" ),
         ( "p15", "c7", 0, "c10", 0 ) : ( "N/A", "Clean entire data cache" ), # ARM11
         ( "p15", "c7", 0, "c10", 1 ) : ( "DCCMVAC", "Data Cache line Clean by VA to PoC" ),
         ( "p15", "c7", 0, "c10", 2 ) : ( "DCCSW", "Data Cache line Clean by Set/Way" ),
@@ -267,8 +276,13 @@ COPROC_REGISTERS = {
         ( "p15", "c11", 0, "c8", 0)  : ( "N/A", "DMA Channel Status" ),
         ( "p15", "c11", 0, "c15", 0) : ( "N/A", "DMA Context ID" ),
 
+        # Reset management registers.
         ( "p15", "c12", 0, "c0", 0 ) : ( "VBAR", "Vector Base Address Register" ),
-        ( "p15", "c12", 0, "c0", 1 ) : ( "MVBAR", "Monitor Vector Base Address Register", "RVBAR", "Reset Vector Base Address Register" ),
+        ( "p15", "c12", 0, "c0", 1 ) : ( "RVBAR", "Reset Vector Base Address Register" , 
+                                         "MVBAR", "Monitor Vector Base Address Register" ),
+        ( "p15", "c12", 0, "c0", 2 ) : ( "RMR", "Reset Management Register" ),
+        ( "p15", "c12", 4, "c0", 2 ) : ( "HRMR", "Hyp Reset Management Register" ),
+
         ( "p15", "c12", 0, "c1", 0 ) : ( "ISR", "Interrupt Status Register" ),
         ( "p15", "c12", 4, "c0", 0 ) : ( "HVBAR", "Hyp Vector Base Address Register" ),
 
@@ -324,6 +338,8 @@ COPROC_REGISTERS = {
         ( "p14", "c2", 7, "c0", 0 )  : ( "JMCR", "Jazelle Main Configuration Register" ),
 
         # Debug registers
+        ( "p15", "c4", 3, "c5", 0 )  : ( "DSPSR", "Debug Saved Program Status Register" ),
+        ( "p15", "c4", 3, "c5", 1 )  : ( "DLR", "Debug Link Register" ),
         ( "p14", "c0", 0, "c0", 0 )  : ( "DBGDIDR", "Debug ID Register" ),
         ( "p14", "c0", 0, "c6", 0 )  : ( "DBGWFAR", "Debug Watchpoint Fault Address Register" ),
         ( "p14", "c0", 0, "c6", 2 )  : ( "DBGOSECCR", "Debug OS Lock Exception Catch Control Register" ),
