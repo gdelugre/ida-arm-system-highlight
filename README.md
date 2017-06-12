@@ -11,9 +11,13 @@ decode the internal registers accessed by co-processor instructions
 After applying the script, the system registers accessed will be automatically
 commented in the database, as defined in the official ARM reference manuals.
 
-
 ![AArch32 decoding](/img/aarch32_hl.png)
 ![AArch64 decoding](/img/aarch64_hl.png)
+
+The script will also try to automatically detect the accessed fields for some
+registers:
+
+![Field decoding](/img/scr_decode_bits.png)
 
 ## Usage
 
