@@ -209,6 +209,7 @@ COPROC_REGISTERS = {
         ( "p15", "c8", 0, "c3", 2 )   : ( "TLBIASIDIS", "TLB Invalidate by ASID match, Inner Shareable" ),
         ( "p15", "c8", 0, "c3", 3 )   : ( "TLBIMVAAIS", "TLB Invalidate by VA, All ASID, Inner Shareable" ),
         ( "p15", "c8", 0, "c3", 5 )   : ( "TLBIMVALIS", "TLB Invalidate by VA, Last level, Inner Shareable" ),
+        ( "p15", "c8", 0, "c3", 7 )   : ( "TLBIMVAALIS", "TLB Invalidate by VA, All ASID, Last level, Inner Shareable" ),
         ( "p15", "c8", 0, "c5", 0 )   : ( "ITLBIALL", "Instruction TLB Invalidate All" ),
         ( "p15", "c8", 0, "c5", 1 )   : ( "ITLBIMVA", "Instruction TLB Invalidate by VA" ),
         ( "p15", "c8", 0, "c5", 2 )   : ( "ITLBIASID", "Instruction TLB Invalidate by ASID match" ),
@@ -219,12 +220,20 @@ COPROC_REGISTERS = {
         ( "p15", "c8", 0, "c7", 1 )   : ( "TLBIMVA", "TLB Invalidate by VA" ),
         ( "p15", "c8", 0, "c7", 2 )   : ( "TLBIASID", "TLB Invalidate by ASID match" ),
         ( "p15", "c8", 0, "c7", 3 )   : ( "TLBIMVAA", "TLB Invalidate by VA, All ASID" ),
+        ( "p15", "c8", 0, "c7", 5 )   : ( "TLBIMVAL", "TLB Invalidate by VA, Last level" ),
+        ( "p15", "c8", 0, "c7", 7 )   : ( "TLBIMVAAL", "TLB Invalidate by VA, All ASID, Last level" ),
+        ( "p15", "c8", 4, "c0", 1 )   : ( "TLBIIPAS2IS", "TLB Invalidate by Intermediate Physical Address, Stage 2, Inner Shareable" ),
+        ( "p15", "c8", 4, "c0", 5 )   : ( "TLBIIPAS2LIS", "TLB Invalidate by Intermediate Physical Address, Stage 2, Last level, Inner Shareable" ),
         ( "p15", "c8", 4, "c3", 0 )   : ( "TLBIALLHIS", "TLB Invalidate All, Hyp mode, Inner Shareable" ),
         ( "p15", "c8", 4, "c3", 1 )   : ( "TLBIMVAHIS", "TLB Invalidate by VA, Hyp mode, Inner Shareable" ),
         ( "p15", "c8", 4, "c3", 4 )   : ( "TLBIALLNSNHIS", "TLB Invalidate All, Non-Secure Non-Hyp, Inner Shareable" ),
+        ( "p15", "c8", 4, "c3", 5 )   : ( "TLBIMVALHIS", "TLB Invalidate by VA, Last level, Hyp mode, Inner Shareable" ),
+        ( "p15", "c8", 4, "c4", 1 )   : ( "TLBIIPAS2", "TLB Invalidate by Intermediate Physical Address, Stage 2" ),
+        ( "p15", "c8", 4, "c4", 5 )   : ( "TLBIIPAS2L", "TLB Invalidate by Intermediate Physical Address, Stage 2, Last level" ),
         ( "p15", "c8", 4, "c7", 0 )   : ( "TLBIALLH", "TLB Invalidate All, Hyp mode" ),
         ( "p15", "c8", 4, "c7", 1 )   : ( "TLBIMVAH", "TLB Invalidate by VA, Hyp mode" ),
         ( "p15", "c8", 4, "c7", 4 )   : ( "TLBIALLNSNH", "TLB Invalidate All, Non-Secure Non-Hyp" ),
+        ( "p15", "c8", 4, "c7", 5 )   : ( "TLBIMVALH", "TLB Invalidate by VA, Last level, Hyp mode" ),
 
         # Performance monitor registers
         ( "p15", "c9", 0, "c0", 0 )   : ( "N/A", "Data Cache Lockdown" ), # ARM11
