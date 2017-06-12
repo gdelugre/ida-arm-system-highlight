@@ -1030,6 +1030,16 @@ def backtrack_fields(ea, reg, fields):
         else:
             break
 
+def track_fields(ea, reg, fields):
+    while True:
+        ea += ItemSize(ea)
+        next_mnem = GetMnem(ea)[0:3]
+        if next_mnem in ("TST", "TEQ", "AND") and GetOpnd(ea, 0) == reg and GetOpnd(ea, 1)[0] == "#":
+            bits = extract_bits(fields, GetOperandValue(ea, 1))
+            MakeComm(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
+        else:
+            break
+
 def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields = {}):
     desc = known_regs.get(sig, None)
     if desc:
@@ -1038,10 +1048,12 @@ def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields 
         print(cmt)
 
         # Try to resolve fields during a write operation.
-        if access == '>' and len(desc) == 2:
-            fields = known_fields.get(desc[0], None)
-            if fields:
+        fields = known_fields.get(desc[0], None)
+        if fields and len(desc) == 2:
+            if access == '>':
                 backtrack_fields(ea, cpu_reg, fields)
+            else:
+                track_fields(ea, cpu_reg, fields)
     else:
         print("Cannot identify system register.")
         MakeComm(ea, "[%s] Unknown system register." % access)
