@@ -61,7 +61,7 @@ COPROC_REGISTERS_64 = {
         ( "p15", 1, "c14" )           : ( "CNTVCT", "Counter-timer Virtual Count register" ),
         ( "p15", 2, "c14" )           : ( "CNTP_CVAL", "Counter-timer Physical Timer CompareValue register",
                                           "CNTHP_CVAL", "Counter-timer Hyp Physical CompareValue register" ),
-        ( "p15", 3, "c14" )           : ( "CNTV_CVAL", "Counter-timer Virtual Timer CompareValue register", 
+        ( "p15", 3, "c14" )           : ( "CNTV_CVAL", "Counter-timer Virtual Timer CompareValue register",
                                           "CNTHV_CVAL", "Counter-timer Virtual Timer CompareValue register (EL2)" ),
         ( "p15", 4, "c14" )           : ( "CNTVOFF", "Counter-timer Virtual Offset register" ),
         ( "p15", 6, "c14" )           : ( "CNTHP_CVAL", "Counter-timer Hyp Physical CompareValue register" ),
@@ -354,7 +354,7 @@ COPROC_REGISTERS = {
 
         # Reset management registers.
         ( "p15", "c12", 0, "c0", 0 )  : ( "VBAR", "Vector Base Address Register" ),
-        ( "p15", "c12", 0, "c0", 1 )  : ( "RVBAR", "Reset Vector Base Address Register" , 
+        ( "p15", "c12", 0, "c0", 1 )  : ( "RVBAR", "Reset Vector Base Address Register" ,
                                           "MVBAR", "Monitor Vector Base Address Register" ),
         ( "p15", "c12", 0, "c0", 2 )  : ( "RMR", "Reset Management Register" ),
         ( "p15", "c12", 4, "c0", 2 )  : ( "HRMR", "Hyp Reset Management Register" ),
@@ -371,7 +371,18 @@ COPROC_REGISTERS = {
 
         # Generic timer registers
         ( "p15", "c14", 0, "c0", 0 )  : ( "CNTFRQ", "Counter-timer Frequency register" ),
-        #TODO
+        ( "p15", "c14", 0, "c1", 0 )  : ( "CNTKCTL", "Counter-timer Kernel Control register" ),
+        ( "p15", "c14", 0, "c2", 0 )  : ( "CNTP_TVAL", "Counter-timer Physical Timer TimerValue register",
+                                          "CNTHP_TVAL", "Counter-timer Hyp Physical Timer TimerValue register" ),
+        ( "p15", "c14", 0, "c2", 1 )  : ( "CNTP_CTL", "Counter-timer Physical Timer Control register",
+                                          "CNTHP_CTL", "Counter-timer Hyp Physical Timer Control register" ),
+        ( "p15", "c14", 0, "c3", 0 )  : ( "CNTV_TVAL", "Counter-timer Virtual Timer TimerValue register",
+                                          "CNTHV_TVAL", "Counter-timer Virtual Timer TimerValue register (EL2)" ),
+        ( "p15", "c14", 0, "c3", 1 )  : ( "CNTV_CTL", "Counter-timer Virtual Timer Control register",
+                                          "CNTHV_CTL", "Counter-timer Virtual Timer Control register (EL2)" ),
+        ( "p15", "c14", 4, "c1", 0 )  : ( "CNTHCTL", "Counter-timer Hyp Control register" ),
+        ( "p15", "c14", 4, "c2", 0 )  : ( "CNTHP_TVAL", "Counter-timer Hyp Physical Timer TimerValue register" ),
+        ( "p15", "c14", 4, "c2", 1 )  : ( "CNTHP_CTL", "Counter-timer Hyp Physical Timer Control register" ),
 
         ( "p15", "c15", 0, "c0", 0 )  : ( "IL1Data0", "Instruction L1 Data n Register" ),
         ( "p15", "c15", 0, "c0", 1 )  : ( "IL1Data1", "Instruction L1 Data n Register" ),
@@ -514,7 +525,7 @@ COPROC_REGISTERS = {
         ( "p14", "c7", 0, "c8", 6 )   : ( "DBGCLAIMSET", "Debug Claim Tag Set register" ),
         ( "p14", "c7", 0, "c9", 6 )   : ( "DBGCLAIMCLR", "Debug Claim Tag Clear register" ),
         ( "p14", "c0", 0, "c1", 0 )   : ( "DBGDSCRint", "Debug Status and Control Register, Internal View" ),
-        ( "p14", "c0", 0, "c5", 0 )   : ( "DBGDTRRXint", "Debug Data Transfer Register, Receive", 
+        ( "p14", "c0", 0, "c5", 0 )   : ( "DBGDTRRXint", "Debug Data Transfer Register, Receive",
                                           "DBGDTRTXint", "Debug Data Transfer Register, Transmit" ),
         ( "p14", "c1", 0, "c0", 0 )   : ( "DBGDRAR", "Debug ROM Address Register" ),
         ( "p14", "c1", 0, "c3", 4 )   : ( "DBGOSDLR", "Debug OS Double Lock Register" ),
