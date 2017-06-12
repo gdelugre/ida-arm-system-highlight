@@ -318,6 +318,11 @@ COPROC_REGISTERS = {
         ( "p15", "c15", 7, "c0", 0)  : ( "N/A", "Cache Debug Control" ), # ARM11
         ( "p15", "c15", 7, "c1", 0)  : ( "N/A", "TLB Debug Control" ), # ARM11
 
+        # Jazelle registers
+        ( "p14", "c0", 7, "c0", 0 )  : ( "JIDR", "Jazelle ID Register" ),
+        ( "p14", "c1", 7, "c0", 0 )  : ( "JOSCR", "Jazelle OS Control Register" ),
+        ( "p14", "c2", 7, "c0", 0 )  : ( "JMCR", "Jazelle Main Configuration Register" ),
+
         # Debug registers
         ( "p14", "c0", 0, "c0", 0 )  : ( "DBGDIDR", "Debug ID Register" ),
         ( "p14", "c0", 0, "c6", 0 )  : ( "DBGWFAR", "Debug Watchpoint Fault Address Register" ),
