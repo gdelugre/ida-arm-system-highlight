@@ -1302,8 +1302,11 @@ def track_fields(ea, reg, fields):
     while True:
         ea += ItemSize(ea)
         next_mnem = GetMnem(ea)[0:3]
-        if next_mnem in ("TST", "TEQ", "AND") and GetOpnd(ea, 0) == reg and GetOpnd(ea, 1)[0] == "#":
+        if next_mnem in ("TST", "TEQ") and GetOpnd(ea, 0) == reg and GetOpnd(ea, 1)[0] == "#":
             bits = extract_bits(fields, GetOperandValue(ea, 1))
+            MakeComm(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
+        elif next_mnem == "AND" and GetOpnd(ea, 1) == reg and GetOpnd(ea, 2)[0] == "#":
+            bits = extract_bits(fields, GetOperandValue(ea, 2))
             MakeComm(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
         else:
             break
