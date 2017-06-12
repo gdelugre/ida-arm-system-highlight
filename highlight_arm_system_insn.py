@@ -369,7 +369,7 @@ COPROC_REGISTERS = {
         ( "p15", "c13", 0, "c0", 4 )  : ( "TPIDRPRW", "PL1 Software Thread ID Register" ),
         ( "p15", "c13", 4, "c0", 2 )  : ( "HTPIDR", "Hyp Software Thread ID Register" ),
 
-        # Generic timer registers
+        # Generic timer registers.
         ( "p15", "c14", 0, "c0", 0 )  : ( "CNTFRQ", "Counter-timer Frequency register" ),
         ( "p15", "c14", 0, "c1", 0 )  : ( "CNTKCTL", "Counter-timer Kernel Control register" ),
         ( "p15", "c14", 0, "c2", 0 )  : ( "CNTP_TVAL", "Counter-timer Physical Timer TimerValue register",
@@ -383,6 +383,103 @@ COPROC_REGISTERS = {
         ( "p15", "c14", 4, "c1", 0 )  : ( "CNTHCTL", "Counter-timer Hyp Control register" ),
         ( "p15", "c14", 4, "c2", 0 )  : ( "CNTHP_TVAL", "Counter-timer Hyp Physical Timer TimerValue register" ),
         ( "p15", "c14", 4, "c2", 1 )  : ( "CNTHP_CTL", "Counter-timer Hyp Physical Timer Control register" ),
+
+        # Generic interrupt controller registers.
+        ( "p15", "c4", 0, "c6", 0 )   : ( "ICC_PMR", "Interrupt Controller Interrupt Priority Mask Register",
+                                          "ICV_PMR", "Interrupt Controller Virtual Interrupt Priority Mask Register" ),
+        ( "p15", "c12", 0, "c8", 0 )  : ( "ICC_IAR0", "Interrupt Controller Interrupt Acknowledge Register 0",
+                                          "ICV_IAR0", "Interrupt Controller Virtual Interrupt Acknowledge Register 0" ),
+        ( "p15", "c12", 0, "c8", 1 )  : ( "ICC_EOIR0", "Interrupt Controller End Of Interrupt Register 0",
+                                          "ICV_EOIR0", "Interrupt Controller Virtual End Of Interrupt Register 0" ),
+        ( "p15", "c12", 0, "c8", 2 )  : ( "ICC_HPPIR0", "Interrupt Controller Highest Priority Pending Interrupt Register 0",
+                                          "ICV_HPPIR0", "Interrupt Controller Virtual Highest Priority Pending Interrupt Register 0" ),
+        ( "p15", "c12", 0, "c8", 3 )  : ( "ICC_BPR0", "Interrupt Controller Binary Point Register 0",
+                                          "ICV_BPR0", "Interrupt Controller Virtual Binary Point Register 0" ),
+        ( "p15", "c12", 0, "c8", 4 )  : ( "ICC_AP0R0", "Interrupt Controller Active Priorities Group 0 Register 0",
+                                          "ICV_AP0R0", "Interrupt Controller Virtual Active Priorities Group 0 Register 0" ),
+        ( "p15", "c12", 0, "c8", 5 )  : ( "ICC_AP0R1", "Interrupt Controller Active Priorities Group 0 Register 1",
+                                          "ICV_AP0R1", "Interrupt Controller Virtual Active Priorities Group 0 Register 1" ),
+        ( "p15", "c12", 0, "c8", 6 )  : ( "ICC_AP0R2", "Interrupt Controller Active Priorities Group 0 Register 2",
+                                          "ICV_AP0R2", "Interrupt Controller Virtual Active Priorities Group 0 Register 2" ),
+        ( "p15", "c12", 0, "c8", 7 )  : ( "ICC_AP0R3", "Interrupt Controller Active Priorities Group 0 Register 3",
+                                          "ICV_AP0R3", "Interrupt Controller Virtual Active Priorities Group 0 Register 3" ),
+        ( "p15", "c12", 0, "c9", 0 )  : ( "ICC_AP1R0", "Interrupt Controller Active Priorities Group 1 Register 0",
+                                          "ICV_AP1R0", "Interrupt Controller Virtual Active Priorities Group 1 Register 0" ),
+        ( "p15", "c12", 0, "c9", 1 )  : ( "ICC_AP1R1", "Interrupt Controller Active Priorities Group 1 Register 1",
+                                          "ICV_AP1R1", "Interrupt Controller Virtual Active Priorities Group 1 Register 1" ),
+        ( "p15", "c12", 0, "c9", 2 )  : ( "ICC_AP1R2", "Interrupt Controller Active Priorities Group 1 Register 2",
+                                          "ICV_AP1R2", "Interrupt Controller Virtual Active Priorities Group 1 Register 2" ),
+        ( "p15", "c12", 0, "c9", 3 )  : ( "ICC_AP1R3", "Interrupt Controller Active Priorities Group 1 Register 3",
+                                          "ICV_AP1R3", "Interrupt Controller Virtual Active Priorities Group 1 Register 3" ),
+        ( "p15", "c12", 0, "c11", 1 ) : ( "ICC_DIR", "Interrupt Controller Deactivate Interrupt Register",
+                                          "ICV_DIR", "Interrupt Controller Deactivate Virtual Interrupt Register" ),
+        ( "p15", "c12", 0, "c11", 3 ) : ( "ICC_RPR", "Interrupt Controller Running Priority Register",
+                                          "ICV_RPR", "Interrupt Controller Virtual Running Priority Register" ),
+        ( "p15", "c12", 0, "c12", 0 ) : ( "ICC_IAR1", "Interrupt Controller Interrupt Acknowledge Register 1",
+                                          "ICV_IAR1", "Interrupt Controller Virtual Interrupt Acknowledge Register 1" ),
+        ( "p15", "c12", 0, "c12", 1 ) : ( "ICC_EOIR1", "Interrupt Controller End Of Interrupt Register 1",
+                                          "ICV_EOIR1", "Interrupt Controller Virtual End Of Interrupt Register 1" ),
+        ( "p15", "c12", 0, "c12", 2 ) : ( "ICC_HPPIR1", "Interrupt Controller Highest Priority Pending Interrupt Register 1",
+                                          "ICV_HPPIR1", "Interrupt Controller Virtual Highest Priority Pending Interrupt Register 1" ),
+        ( "p15", "c12", 0, "c12", 3 ) : ( "ICC_BPR1", "Interrupt Controller Binary Point Register 1",
+                                          "ICV_BPR1", "Interrupt Controller Virtual Binary Point Register 1" ),
+        ( "p15", "c12", 0, "c12", 4 ) : ( "ICC_CTLR", "Interrupt Controller Control Register",
+                                          "ICV_CTLR", "Interrupt Controller Virtual Control Register" ),
+        ( "p15", "c12", 0, "c12", 5 ) : ( "ICC_SRE", "Interrupt Controller System Register Enable register" ),
+        ( "p15", "c12", 0, "c12", 6 ) : ( "ICC_IGRPEN0", "Interrupt Controller Interrupt Group 0 Enable register",
+                                          "ICV_IGRPEN0", "Interrupt Controller Virtual Interrupt Group 0 Enable register" ),
+        ( "p15", "c12", 0, "c12", 7 ) : ( "ICC_IGRPEN1", "Interrupt Controller Interrupt Group 1 Enable register",
+                                          "ICV_IGRPEN1", "Interrupt Controller Virtual Interrupt Group 1 Enable register" ),
+        ( "p15", "c12", 4, "c8", 0 )  : ( "ICH_AP0R0", "Interrupt Controller Hyp Active Priorities Group 0 Register 0" ),
+        ( "p15", "c12", 4, "c8", 1 )  : ( "ICH_AP0R1", "Interrupt Controller Hyp Active Priorities Group 0 Register 1" ),
+        ( "p15", "c12", 4, "c8", 2 )  : ( "ICH_AP0R2", "Interrupt Controller Hyp Active Priorities Group 0 Register 2" ),
+        ( "p15", "c12", 4, "c8", 3 )  : ( "ICH_AP0R3", "Interrupt Controller Hyp Active Priorities Group 0 Register 3" ),
+        ( "p15", "c12", 4, "c9", 0 )  : ( "ICH_AP1R0", "Interrupt Controller Hyp Active Priorities Group 1 Register 0" ),
+        ( "p15", "c12", 4, "c9", 1 )  : ( "ICH_AP1R1", "Interrupt Controller Hyp Active Priorities Group 1 Register 1" ),
+        ( "p15", "c12", 4, "c9", 2 )  : ( "ICH_AP1R2", "Interrupt Controller Hyp Active Priorities Group 1 Register 2" ),
+        ( "p15", "c12", 4, "c9", 3 )  : ( "ICH_AP1R3", "Interrupt Controller Hyp Active Priorities Group 1 Register 3" ),
+        ( "p15", "c12", 4, "c9", 5 )  : ( "ICC_HSRE", "Interrupt Controller Hyp System Register Enable register" ),
+        ( "p15", "c12", 4, "c11", 0 ) : ( "ICH_HCR", "Interrupt Controller Hyp Control Register" ),
+        ( "p15", "c12", 4, "c11", 1 ) : ( "ICH_VTR", "Interrupt Controller VGIC Type Register" ),
+        ( "p15", "c12", 4, "c11", 2 ) : ( "ICH_MISR", "Interrupt Controller Maintenance Interrupt State Register" ),
+        ( "p15", "c12", 4, "c11", 3 ) : ( "ICH_EISR", "Interrupt Controller End of Interrupt Status Register" ),
+        ( "p15", "c12", 4, "c11", 5 ) : ( "ICH_ELRSR", "Interrupt Controller Empty List Register Status Register" ),
+        ( "p15", "c12", 4, "c11", 7 ) : ( "ICH_VMCR", "Interrupt Controller Virtual Machine Control Register" ),
+        ( "p15", "c12", 4, "c12", 0 ) : ( "ICH_LR0", "Interrupt Controller List Register 0" ),
+        ( "p15", "c12", 4, "c12", 1 ) : ( "ICH_LR1", "Interrupt Controller List Register 1" ),
+        ( "p15", "c12", 4, "c12", 2 ) : ( "ICH_LR2", "Interrupt Controller List Register 2" ),
+        ( "p15", "c12", 4, "c12", 3 ) : ( "ICH_LR3", "Interrupt Controller List Register 3" ),
+        ( "p15", "c12", 4, "c12", 4 ) : ( "ICH_LR4", "Interrupt Controller List Register 4" ),
+        ( "p15", "c12", 4, "c12", 5 ) : ( "ICH_LR5", "Interrupt Controller List Register 5" ),
+        ( "p15", "c12", 4, "c12", 6 ) : ( "ICH_LR6", "Interrupt Controller List Register 6" ),
+        ( "p15", "c12", 4, "c12", 7 ) : ( "ICH_LR7", "Interrupt Controller List Register 7" ),
+        ( "p15", "c12", 4, "c13", 0 ) : ( "ICH_LR8", "Interrupt Controller List Register 8" ),
+        ( "p15", "c12", 4, "c13", 1 ) : ( "ICH_LR9", "Interrupt Controller List Register 9" ),
+        ( "p15", "c12", 4, "c13", 2 ) : ( "ICH_LR10", "Interrupt Controller List Register 10" ),
+        ( "p15", "c12", 4, "c13", 3 ) : ( "ICH_LR11", "Interrupt Controller List Register 11" ),
+        ( "p15", "c12", 4, "c13", 4 ) : ( "ICH_LR12", "Interrupt Controller List Register 12" ),
+        ( "p15", "c12", 4, "c13", 5 ) : ( "ICH_LR13", "Interrupt Controller List Register 13" ),
+        ( "p15", "c12", 4, "c13", 6 ) : ( "ICH_LR14", "Interrupt Controller List Register 14" ),
+        ( "p15", "c12", 4, "c13", 7 ) : ( "ICH_LR15", "Interrupt Controller List Register 15" ),
+        ( "p15", "c12", 4, "c14", 0 ) : ( "ICH_LRC0", "Interrupt Controller List Register 0" ),
+        ( "p15", "c12", 4, "c14", 1 ) : ( "ICH_LRC1", "Interrupt Controller List Register 1" ),
+        ( "p15", "c12", 4, "c14", 2 ) : ( "ICH_LRC2", "Interrupt Controller List Register 2" ),
+        ( "p15", "c12", 4, "c14", 3 ) : ( "ICH_LRC3", "Interrupt Controller List Register 3" ),
+        ( "p15", "c12", 4, "c14", 4 ) : ( "ICH_LRC4", "Interrupt Controller List Register 4" ),
+        ( "p15", "c12", 4, "c14", 5 ) : ( "ICH_LRC5", "Interrupt Controller List Register 5" ),
+        ( "p15", "c12", 4, "c14", 6 ) : ( "ICH_LRC6", "Interrupt Controller List Register 6" ),
+        ( "p15", "c12", 4, "c14", 7 ) : ( "ICH_LRC7", "Interrupt Controller List Register 7" ),
+        ( "p15", "c12", 4, "c15", 0 ) : ( "ICH_LRC8", "Interrupt Controller List Register 8" ),
+        ( "p15", "c12", 4, "c15", 1 ) : ( "ICH_LRC9", "Interrupt Controller List Register 9" ),
+        ( "p15", "c12", 4, "c15", 2 ) : ( "ICH_LRC10", "Interrupt Controller List Register 10" ),
+        ( "p15", "c12", 4, "c15", 3 ) : ( "ICH_LRC11", "Interrupt Controller List Register 11" ),
+        ( "p15", "c12", 4, "c15", 4 ) : ( "ICH_LRC12", "Interrupt Controller List Register 12" ),
+        ( "p15", "c12", 4, "c15", 5 ) : ( "ICH_LRC13", "Interrupt Controller List Register 13" ),
+        ( "p15", "c12", 4, "c15", 6 ) : ( "ICH_LRC14", "Interrupt Controller List Register 14" ),
+        ( "p15", "c12", 4, "c15", 7 ) : ( "ICH_LRC15", "Interrupt Controller List Register 15" ),
+        ( "p15", "c12", 6, "c12", 4 ) : ( "ICC_MCTLR", "Interrupt Controller Monitor Control Register" ),
+        ( "p15", "c12", 6, "c12", 5 ) : ( "ICC_MSRE", "Interrupt Controller Monitor System Register Enable register" ),
+        ( "p15", "c12", 6, "c12", 7 ) : ( "ICC_MGRPEN1", "Interrupt Controller Monitor Interrupt Group 1 Enable register" ),
 
         ( "p15", "c15", 0, "c0", 0 )  : ( "IL1Data0", "Instruction L1 Data n Register" ),
         ( "p15", "c15", 0, "c0", 1 )  : ( "IL1Data1", "Instruction L1 Data n Register" ),
@@ -399,25 +496,25 @@ COPROC_REGISTERS = {
         ( "p15", "c15", 0, "c12", 1 ) : ( "CCNT", "Cycle Counter" ), #ARM11
         ( "p15", "c15", 0, "c12", 2 ) : ( "PMN0", "Count 0" ), #ARM11
         ( "p15", "c15", 0, "c12", 3 ) : ( "PMN1", "Count 1" ), #ARM11
-        ( "p15", "c15", 1, "c0", 0)   : ( "L2ACTLR", "L2 Auxiliary Control Register" ),
-        ( "p15", "c15", 1, "c0", 3)   : ( "L2FPR", "L2 Prefetch Control Register" ),
-        ( "p15", "c15", 3, "c0", 0)   : ( "N/A", "Data Debug Cache" ), # ARM11
-        ( "p15", "c15", 3, "c0", 1)   : ( "N/A", "Instruction Debug Cache" ), # ARM11
-        ( "p15", "c15", 3, "c2", 0)   : ( "N/A", "Data Tag RAM Read Operation" ), # ARM11
-        ( "p15", "c15", 3, "c2", 1)   : ( "N/A", "Instruction Tag RAM Read Operation" ), # ARM11
-        ( "p15", "c15", 4, "c0", 0)   : ( "CBAR", "Configuration Base Address Register" ),
-        ( "p15", "c15", 5, "c4", 0)   : ( "N/A", "Data MicroTLB Index" ), # ARM11
-        ( "p15", "c15", 5, "c4", 1)   : ( "N/A", "Instruction MicroTLB Index" ), # ARM11
-        ( "p15", "c15", 5, "c4", 2)   : ( "N/A", "Read Main TLB Entry" ), # ARM11
-        ( "p15", "c15", 5, "c4", 4)   : ( "N/A", "Write Main TLB Entry" ), # ARM11
-        ( "p15", "c15", 5, "c5", 0)   : ( "N/A", "Data MicroTLB VA" ), # ARM11
-        ( "p15", "c15", 5, "c5", 1)   : ( "N/A", "Instruction MicroTLB VA" ), # ARM11
-        ( "p15", "c15", 5, "c5", 2)   : ( "N/A", "Main TLB VA" ), # ARM11
-        ( "p15", "c15", 5, "c7", 0)   : ( "N/A", "Data MicroTLB Attribute" ), # ARM11
-        ( "p15", "c15", 5, "c7", 1)   : ( "N/A", "Instruction MicroTLB Attribute" ), # ARM11
-        ( "p15", "c15", 5, "c7", 2)   : ( "N/A", "Main TLB Attribute" ), # ARM11
-        ( "p15", "c15", 7, "c0", 0)   : ( "N/A", "Cache Debug Control" ), # ARM11
-        ( "p15", "c15", 7, "c1", 0)   : ( "N/A", "TLB Debug Control" ), # ARM11
+        ( "p15", "c15", 1, "c0", 0 )  : ( "L2ACTLR", "L2 Auxiliary Control Register" ),
+        ( "p15", "c15", 1, "c0", 3 )  : ( "L2FPR", "L2 Prefetch Control Register" ),
+        ( "p15", "c15", 3, "c0", 0 )  : ( "N/A", "Data Debug Cache" ), # ARM11
+        ( "p15", "c15", 3, "c0", 1 )  : ( "N/A", "Instruction Debug Cache" ), # ARM11
+        ( "p15", "c15", 3, "c2", 0 )  : ( "N/A", "Data Tag RAM Read Operation" ), # ARM11
+        ( "p15", "c15", 3, "c2", 1 )  : ( "N/A", "Instruction Tag RAM Read Operation" ), # ARM11
+        ( "p15", "c15", 4, "c0", 0 )  : ( "CBAR", "Configuration Base Address Register" ),
+        ( "p15", "c15", 5, "c4", 0 )  : ( "N/A", "Data MicroTLB Index" ), # ARM11
+        ( "p15", "c15", 5, "c4", 1 )  : ( "N/A", "Instruction MicroTLB Index" ), # ARM11
+        ( "p15", "c15", 5, "c4", 2 )  : ( "N/A", "Read Main TLB Entry" ), # ARM11
+        ( "p15", "c15", 5, "c4", 4 )  : ( "N/A", "Write Main TLB Entry" ), # ARM11
+        ( "p15", "c15", 5, "c5", 0 )  : ( "N/A", "Data MicroTLB VA" ), # ARM11
+        ( "p15", "c15", 5, "c5", 1 )  : ( "N/A", "Instruction MicroTLB VA" ), # ARM11
+        ( "p15", "c15", 5, "c5", 2 )  : ( "N/A", "Main TLB VA" ), # ARM11
+        ( "p15", "c15", 5, "c7", 0 )  : ( "N/A", "Data MicroTLB Attribute" ), # ARM11
+        ( "p15", "c15", 5, "c7", 1 )  : ( "N/A", "Instruction MicroTLB Attribute" ), # ARM11
+        ( "p15", "c15", 5, "c7", 2 )  : ( "N/A", "Main TLB Attribute" ), # ARM11
+        ( "p15", "c15", 7, "c0", 0 )  : ( "N/A", "Cache Debug Control" ), # ARM11
+        ( "p15", "c15", 7, "c1", 0 )  : ( "N/A", "TLB Debug Control" ), # ARM11
 
         # Jazelle registers
         ( "p14", "c0", 7, "c0", 0 )   : ( "JIDR", "Jazelle ID Register" ),
