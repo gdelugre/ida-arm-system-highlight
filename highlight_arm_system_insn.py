@@ -43,6 +43,14 @@ SYSTEM_INSN = (
     # Return from exception
     "RFE",  # Aarch32
     "ERET", # Aarch64
+
+    # Pointer authentication
+    "PACDA", "PACDZA", "PACDB", "PACDZB", "PACGA",
+    "PACIA", "PACIA1716", "PACIASP", "PACIAZ", "PACIZA",
+    "PACIB", "PACIB1716", "PACIBSP", "PACIBZ", "PACIZB",
+    "AUTDA", "AUTDZA", "AUTDB", "AUTDZB",
+    "AUTIA", "AUTIA1716", "AUTIASP", "AUTIAZ", "AUTIZA",
+    "AUTIB", "AUTIB1716", "AUTIBSP", "AUTIBZ", "AUTIZB",
 )
 
 # 64 bits registers accessible from AArch32.
