@@ -54,7 +54,7 @@ SYSTEM_INSN = (
 )
 
 # 64 bits registers accessible from AArch32.
-# Extracted from the 00bet3.2 XML specifications for ARMv8.2.
+# Extracted from the 00bet4 XML specifications for ARMv8.3.
 COPROC_REGISTERS_64 = {
         # MMU registers
         ( "p15", 0, "c2"  )           : ( "TTBR0", "Translation Table Base Register 0" ),
@@ -84,7 +84,7 @@ COPROC_REGISTERS_64 = {
         ( "p14", 0, "c2"  )           : ( "DBGDSAR", "Debug Self Address Register" ),
 }
 
-# Taken from the Cortex-A15 manual.
+# Extracted from the 00bet4 XML specifications for ARMv8.3 and older manuals .
 COPROC_REGISTERS = {
         ( "p15", "c0", 0, "c0", 0 )   : ( "MIDR", "Main ID Register" ),
         ( "p15", "c0", 0, "c0", 1 )   : ( "CTR", "Cache Type Register" ),
@@ -113,8 +113,10 @@ COPROC_REGISTERS = {
         ( "p15", "c0", 0, "c2", 3 )   : ( "ID_ISAR3", "Instruction Set Attribute Register 3" ),
         ( "p15", "c0", 0, "c2", 4 )   : ( "ID_ISAR4", "Instruction Set Attribute Register 4" ),
         ( "p15", "c0", 0, "c2", 5 )   : ( "ID_ISAR5", "Instruction Set Attribute Register 5" ),
+        ( "p15", "c0", 0, "c2", 7 )   : ( "ID_ISAR6", "Instruction Set Attribute Register 6" ),
 
         ( "p15", "c0", 1, "c0", 0 )   : ( "CCSIDR", "Current Cache Size ID Register" ),
+        ( "p15", "c0", 1, "c0", 2 )   : ( "CCSIDR2", "Current Cache Size ID Register 2" ),
         ( "p15", "c0", 1, "c0", 1 )   : ( "CLIDR", "Cache Level ID Register" ),
         ( "p15", "c0", 1, "c0", 7 )   : ( "AIDR", "Auxiliary ID Register" ),
         ( "p15", "c0", 2, "c0", 0 )   : ( "CSSELR", "Cache Size Selection Register" ),
@@ -638,7 +640,7 @@ COPROC_REGISTERS = {
 }
 
 # Aarch64 system registers.
-# Extracted from the 00bet3.2 XML specifications for ARMv8.2.
+# Extracted from the 00bet4 XML specifications for ARMv8.3.
 SYSTEM_REGISTERS = {
         # Special purpose registers.
         ( 0b011, 0b000, "c4", "c2", 0b010 )   : ( "CurrentEL", "Current Exception Level" ),
@@ -683,6 +685,7 @@ SYSTEM_REGISTERS = {
         ( 0b011, 0b101, "c10", "c3", 0b000 )  : ( "AMAIR_EL12", "Auxiliary Memory Attribute Indirection Register (EL1)" ),
         ( 0b011, 0b110, "c10", "c3", 0b000 )  : ( "AMAIR_EL3", "Auxiliary Memory Attribute Indirection Register (EL3)" ),
         ( 0b011, 0b001, "c0", "c0", 0b000 )   : ( "CCSIDR_EL1", "Current Cache Size ID Register" ),
+        ( 0b011, 0b001, "c0", "c0", 0b010 )   : ( "CCSIDR2_EL1", "Current Cache Size ID Register 2" ),
         ( 0b011, 0b001, "c0", "c0", 0b001 )   : ( "CLIDR_EL1", "Cache Level ID Register" ),
         ( 0b011, 0b000, "c13", "c0", 0b001 )  : ( "CONTEXTIDR_EL1", "Context ID Register (EL1)" ),
         ( 0b011, 0b100, "c13", "c0", 0b001 )  : ( "CONTEXTIDR_EL2", "Context ID Register (EL2)" ),
@@ -727,6 +730,7 @@ SYSTEM_REGISTERS = {
         ( 0b011, 0b000, "c0", "c2", 0b011 )   : ( "ID_ISAR3_EL1", "AArch32 Instruction Set Attribute Register 3" ),
         ( 0b011, 0b000, "c0", "c2", 0b100 )   : ( "ID_ISAR4_EL1", "AArch32 Instruction Set Attribute Register 4" ),
         ( 0b011, 0b000, "c0", "c2", 0b101 )   : ( "ID_ISAR5_EL1", "AArch32 Instruction Set Attribute Register 5" ),
+        ( 0b011, 0b000, "c0", "c2", 0b111 )   : ( "ID_ISAR6_EL1", "AArch32 Instruction Set Attribute Register 6" ),
         ( 0b011, 0b000, "c0", "c1", 0b100 )   : ( "ID_MMFR0_EL1", "AArch32 Memory Model Feature Register 0" ),
         ( 0b011, 0b000, "c0", "c1", 0b101 )   : ( "ID_MMFR1_EL1", "AArch32 Memory Model Feature Register 1" ),
         ( 0b011, 0b000, "c0", "c1", 0b110 )   : ( "ID_MMFR2_EL1", "AArch32 Memory Model Feature Register 2" ),
@@ -785,6 +789,18 @@ SYSTEM_REGISTERS = {
         ( 0b011, 0b100, "c0", "c0", 0b000 )   : ( "VPIDR_EL2", "Virtualization Processor ID Register" ),
         ( 0b011, 0b100, "c2", "c1", 0b010 )   : ( "VTCR_EL2", "Virtualization Translation Control Register" ),
         ( 0b011, 0b100, "c2", "c1", 0b000 )   : ( "VTTBR_EL2", "Virtualization Translation Table Base Register" ),
+
+        # Pointer authentication keys.
+        ( 0b011, 0b000, "c2", "c1", 0b000 )   : ( "APIAKeyLo_EL1", "Pointer Authentication Key A for Instruction (bits[63:0]) " ),
+        ( 0b011, 0b000, "c2", "c1", 0b001 )   : ( "APIAKeyHi_EL1", "Pointer Authentication Key A for Instruction (bits[127:64]) " ),
+        ( 0b011, 0b000, "c2", "c1", 0b010 )   : ( "APIBKeyLo_EL1", "Pointer Authentication Key B for Instruction (bits[63:0]) " ),
+        ( 0b011, 0b000, "c2", "c1", 0b011 )   : ( "APIBKeyHi_EL1", "Pointer Authentication Key B for Instruction (bits[127:64]) " ),
+        ( 0b011, 0b000, "c2", "c2", 0b000 )   : ( "APDAKeyLo_EL1", "Pointer Authentication Key A for Data (bits[63:0]) " ),
+        ( 0b011, 0b000, "c2", "c2", 0b001 )   : ( "APDAKeyHi_EL1", "Pointer Authentication Key A for Data (bits[127:64]) " ),
+        ( 0b011, 0b000, "c2", "c2", 0b010 )   : ( "APDBKeyLo_EL1", "Pointer Authentication Key B for Data (bits[63:0]) " ),
+        ( 0b011, 0b000, "c2", "c2", 0b011 )   : ( "APDBKeyHi_EL1", "Pointer Authentication Key B for Data (bits[127:64]) " ),
+        ( 0b011, 0b000, "c2", "c3", 0b000 )   : ( "APGAKeyLo_EL1", "Pointer Authentication Key A for Code  (bits[63:0]) " ),
+        ( 0b011, 0b000, "c2", "c3", 0b001 )   : ( "APGAKeyHi_EL1", "Pointer Authentication Key A for Code (bits[127:64]) " ),
 
         # Debug registers.
         ( 0b011, 0b100, "c1", "c1", 0b001 )   : ( "MDCR_EL2", "Monitor Debug Configuration Register (EL2)" ),
