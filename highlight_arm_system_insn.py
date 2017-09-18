@@ -74,6 +74,12 @@ COPROC_REGISTERS_64 = {
         ( "p15", 4, "c14" )           : ( "CNTVOFF", "Counter-timer Virtual Offset register" ),
         ( "p15", 6, "c14" )           : ( "CNTHP_CVAL", "Counter-timer Hyp Physical CompareValue register" ),
 
+        # CPU control/status registers.
+        ( "p15", 0, "c15" )           : ( "CPUACTLR", "CPU Auxiliary Control Register" ),
+        ( "p15", 1, "c15" )           : ( "CPUECTLR", "CPU Extended Control Register" ),
+        ( "p15", 2, "c15" )           : ( "CPUMERRSR", "CPU Memory Error Syndrome Register" ),
+        ( "p15", 3, "c15" )           : ( "L2MERRSR", "L2 Memory Error Syndrome Register" ),
+
         # Interrupts
         ( "p15", 0, "c12" )           : ( "ICC_SGI1R", "Interrupt Controller Software Generated Interrupt Group 1 Register" ),
         ( "p15", 1, "c12" )           : ( "ICC_ASGI1R", "Interrupt Controller Alias Software Generated Interrupt Group 1 Register" ),
@@ -789,6 +795,10 @@ SYSTEM_REGISTERS = {
         ( 0b011, 0b100, "c0", "c0", 0b000 )   : ( "VPIDR_EL2", "Virtualization Processor ID Register" ),
         ( 0b011, 0b100, "c2", "c1", 0b010 )   : ( "VTCR_EL2", "Virtualization Translation Control Register" ),
         ( 0b011, 0b100, "c2", "c1", 0b000 )   : ( "VTTBR_EL2", "Virtualization Translation Table Base Register" ),
+        ( 0b011, 0b001, "c15", "c2", 0b000 )  : ( "CPUACTLR_EL1", "CPU Auxiliary Control Register (EL1)" ),
+        ( 0b011, 0b001, "c15", "c2", 0b001 )  : ( "CPUECTLR_EL1", "CPU Extended Control Register (EL1)" ),
+        ( 0b011, 0b001, "c15", "c2", 0b010 )  : ( "CPUMERRSR_EL1", "CPU Memory Error Syndrome Register" ),
+        ( 0b011, 0b001, "c15", "c2", 0b011 )  : ( "L2MERRSR_EL1", "L2 Memory Error Syndrome Register" ),
 
         # Pointer authentication keys.
         ( 0b011, 0b000, "c2", "c1", 0b000 )   : ( "APIAKeyLo_EL1", "Pointer Authentication Key A for Instruction (bits[63:0]) " ),
