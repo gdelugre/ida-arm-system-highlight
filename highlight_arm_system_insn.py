@@ -1283,6 +1283,11 @@ ARM_MODES = {
         0b11111 : "System"
 }
 
+PSTATE_OPS = {
+        0b101   : "SPSel",
+        0b110   : "DAIFSet",
+        0b111   : "DAIFClr"
+}
 
 def extract_bits(bitmap, value):
     return [ bitmap[b] for b in bitmap if value & (1 << b) ]
@@ -1404,6 +1409,19 @@ def markup_psr_insn(ea):
         t = (psr & (1 << 5)) and 'T' or '-'
         MakeComm(ea, "Set CPSR [%c%c%c%c%c], Mode: %s" % (e,a,i,f,t,mode))
 
+def markup_pstate_insn(ea):
+    if GetOpnd(ea,0)[0] == "#" and GetOpnd(ea,1)[0] == "#":
+        op = PSTATE_OPS.get(GetOperandValue(ea, 0), "Unknown")
+        value = GetOperandValue(ea, 1)
+        if op == "SPSel":
+            MakeComm(ea, "Select PSTATE.SP = SP_EL%c" % ('0', 'x')[value & 1])
+        elif op[0:4] == "DAIF":
+            d = (value & (1 << 3)) and 'D' or '-'
+            a = (value & (1 << 2)) and 'A' or '-'
+            i = (value & (1 << 1)) and 'I' or '-'
+            f = (value & (1 << 0)) and 'F' or '-'
+            MakeComm(ea, "%s PSTATE.DAIF [%c%c%c%c]" % (op[4:7], d,a,i,f))
+
 def markup_system_insn(ea):
     mnem = GetMnem(ea)
     if mnem[0:4] in ("MRRC", "MCRR"):
@@ -1412,6 +1430,8 @@ def markup_system_insn(ea):
         markup_coproc_insn(ea)
     elif current_arch == 'aarch32' and mnem[0:3] == "MSR":
         markup_psr_insn(ea)
+    elif current_arch == 'aarch64' and mnem[0:3] == "MSR" and not GetOpnd(ea, 2):
+        markup_pstate_insn(ea)
     elif current_arch == 'aarch64' and mnem[0:3] in ("MSR", "MRS"):
         markup_aarch64_sys_insn(ea)
     SetColor(ea, CIC_ITEM, 0x00000000) # Black background, adjust to your own theme
