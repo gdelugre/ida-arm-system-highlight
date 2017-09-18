@@ -1074,6 +1074,24 @@ SYSTEM_REGISTERS = {
 
 # Aarch32 fields.
 COPROC_FIELDS = {
+        "FPSCR" : {
+            0 : ( "IOC", "Invalid Operation exception" ),
+            1 : ( "DZC", "Division by Zero exception" ),
+            2 : ( "OFC", "Overflow exception" ),
+            3 : ( "UFC", "Underflow exception" ),
+            4 : ( "IXC", "Inexact exception" ),
+            7 : ( "IDC", "Input Denormal exception" ),
+            19 : ( "FZ16", "Flush-to-zero mode on half-precision instructions" ),
+            # 22-23: RMode
+            24 : ( "FZ", "Flush-to-zero mode" ),
+            25 : ( "DN", "Default NaN mode" ),
+            26 : ( "AHP", "Alternative Half-Precision" ),
+            27 : ( "QC", "Saturation" ),
+            28 : ( "V", "Overflow flag" ),
+            29 : ( "C", "Carry flag" ),
+            30 : ( "Z", "Zero flag" ),
+            31 : ( "N", "Negative flag" )
+        },
         "HCR" : {
             0 : ( "VM", "Virtualization MMU enable" ),
             1 : ( "SWIO", "Set/Way Invalidation Override" ),
@@ -1175,6 +1193,32 @@ SYSREG_FIELDS = {
             7 : ( "I", "IRQ mask" ),
             8 : ( "A", "SError interrupt mask" ),
             9 : ( "D", "Process state D mask" )
+        },
+        "FPCR" : {
+            8 : ( "IOE", "Invalid Operation exception trap enable" ),
+            9 : ( "DZE", "Division by Zero exception trap enable" ),
+            10 : ( "OFE", "Overflow exception trap enable" ),
+            11 : ( "UFE", "Underflow exception trap enable" ),
+            12 : ( "IXE", "Inexact exception trap enable" ),
+            15 : ( "IDE", "Input Denormal exception trap enable" ),
+            19 : ( "FZ16", "Flush-to-zero mode on half-precision instructions" ),
+            # 22-23 : RMode
+            24 : ( "FZ", "Flush-to-zero-mode" ),
+            25 : ( "DN", "Default NaN mode" ),
+            26 : ( "AHP", "Alternative Half-Precision" )
+        },
+        "FPSR" : {
+            0 : ( "IOC", "Invalid Operation exception" ),
+            1 : ( "DZC", "Division by Zero exception" ),
+            2 : ( "OFC", "Overflow exception" ),
+            3 : ( "UFC", "Underflow exception" ),
+            4 : ( "IXC", "Inexact exception" ),
+            7 : ( "IDC", "Input Denormal exception" ),
+            27 : ( "QC", "Saturation" ),
+            28 : ( "V", "Overflow flag" ),
+            29 : ( "C", "Carry flag" ),
+            30 : ( "Z", "Zero flag" ),
+            31 : ( "N", "Negative flag" )
         },
         "HCR_EL2" : {
             0 : ( "VM", "Virtualization MMU enable" ),
