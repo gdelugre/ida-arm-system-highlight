@@ -85,6 +85,9 @@ COPROC_REGISTERS_64 = {
         ( "p15", 1, "c12" )           : ( "ICC_ASGI1R", "Interrupt Controller Alias Software Generated Interrupt Group 1 Register" ),
         ( "p15", 2, "c12" )           : ( "ICC_SGI0R", "Interrupt Controller Software Generated Interrupt Group 0 Register" ),
 
+        # Preload Engine operations
+        ( "p15", 0, "c11" )           : ( "N/A", "Preload Engine Program New Channel operation" ),
+
         # Debug registers
         ( "p14", 0, "c1"  )           : ( "DBGDRAR", "Debug ROM Address Register" ),
         ( "p14", 0, "c2"  )           : ( "DBGDSAR", "Debug Self Address Register" ),
@@ -531,6 +534,19 @@ COPROC_REGISTERS = {
         ( "p15", "c15", 5, "c7", 2 )  : ( "N/A", "Main TLB Attribute" ), # ARM11
         ( "p15", "c15", 7, "c0", 0 )  : ( "N/A", "Cache Debug Control" ), # ARM11
         ( "p15", "c15", 7, "c1", 0 )  : ( "N/A", "TLB Debug Control" ), # ARM11
+
+        # Preload Engine control registers
+        ( "p15", "c11", 0, "c0", 0 )   : ( "PLEIDR", "Preload Engine ID Register" ),
+        ( "p15", "c11", 0, "c0", 2 )   : ( "PLEASR", "Preload Engine Activity Status Register" ),
+        ( "p15", "c11", 0, "c0", 4 )   : ( "PLEFSR", "Preload Engine FIFO Status Register" ),
+        ( "p15", "c11", 0, "c1", 0 )   : ( "PLEUAR", "Preload Engine User Accessibility Register" ),
+        ( "p15", "c11", 0, "c1", 1 )   : ( "PLEPCR", "Preload Engine Parameters Control Register" ),
+
+        # Preload Engine operations
+        ( "p15", "c11", 0, "c2", 1 )   : ( "PLEFF", "Preload Engine FIFO flush operation" ),
+        ( "p15", "c11", 0, "c3", 0 )   : ( "PLEPC", "Preload Engine pause channel operation" ),
+        ( "p15", "c11", 0, "c3", 1 )   : ( "PLERC", "Preload Engine resume channel operation" ),
+        ( "p15", "c11", 0, "c3", 2 )   : ( "PLEKC", "Preload Engine kill channel operation" ),
 
         # Jazelle registers
         ( "p14", "c0", 7, "c0", 0 )   : ( "JIDR", "Jazelle ID Register" ),
