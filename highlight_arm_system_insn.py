@@ -1210,6 +1210,15 @@ COPROC_FIELDS = {
             25 : ( "EE", "Exception Endianness" ),
             30 : ( "TE", "Thumb Exception Enable" )
         },
+        "NSACR" : {
+            10 : ( "CP10", "CP10 access in the NS state" ),
+            11 : ( "CP11", "CP11 access in the NS state" ),
+            14 : ( "NSD32DIS", "Disable the NS use of D16-D31 of the VFP register file" ),
+            15 : ( "NSASEDIS", "Disable NS Advanced SIMD Extension functionality" ),
+            16 : ( "PLE", "NS access to the Preload Engine resources" ),
+            17 : ( "TL", "Lockable TLB entries can be allocated in NS state" ),
+            18 : ( "NS_SMP", "SMP bit of the Auxiliary Control Register is writable in NS state" ),
+        },
 }
 
 # Aarch64 fields.
