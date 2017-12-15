@@ -1417,7 +1417,7 @@ def track_fields(ea, reg, fields):
             bits = extract_bits(fields, GetOperandValue(ea, 2))
             MakeComm(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
         elif next_mnem == "LSL" and GetDisasm(ea)[3] == "S" and GetOpnd(ea, 1) == reg and GetOpnd(ea, 2)[0] == "#":
-            bits = extract_bits(fields, 2 ** (31 - GetOperandValue(ea, 2)))
+            bits = extract_bits(fields, 1 << (31 - GetOperandValue(ea, 2)))
             MakeComm(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
         else:
             break
