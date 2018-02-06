@@ -8,8 +8,8 @@
 # Author: Guillaume Delugré.
 #
 
-from idautils import *
 from idc import *
+from idautils import *
 
 global current_arch
 
