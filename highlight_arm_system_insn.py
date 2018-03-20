@@ -1446,7 +1446,8 @@ def markup_coproc_reg64_insn(ea):
     else:
         access = '>'
     op1 = GetOperandValue(ea, 0)
-    cp = "p%d" % DecodeInstruction(ea).Op1.specflag1
+    cp = "p%d" % idautils.DecodeInstruction(ea).Op1.specflag1
+
     reg1, reg2, crm = GetOpnd(ea, 1).split(',')
 
     sig = ( cp, op1, crm )
@@ -1459,7 +1460,7 @@ def markup_coproc_insn(ea):
         access = '>'
     op1, op2 = GetOperandValue(ea, 0), GetOperandValue(ea, 2)
     reg, crn, crm = GetOpnd(ea, 1).split(',')
-    cp = "p%d" % DecodeInstruction(ea).Op1.specflag1
+    cp = "p%d" % idautils.DecodeInstruction(ea).Op1.specflag1
 
     sig = ( cp, crn, op1, crm, op2 )
     identify_register(ea, access, sig, COPROC_REGISTERS, reg, COPROC_FIELDS)
