@@ -1459,7 +1459,11 @@ def markup_coproc_insn(ea):
         access = '>'
     op1, op2 = GetOperandValue(ea, 0), GetOperandValue(ea, 2)
     reg, crn, crm = GetOpnd(ea, 1).split(',')
-    cp = "p%d" % DecodeInstruction(ea).Op1.specflag1
+
+    insn = ida_ua.insn_t()
+    ida_ua.decode_insn(insn, ea)
+
+    cp = "p%d" % insn.Op1.specflag1
 
     sig = ( cp, crn, op1, crm, op2 )
     identify_register(ea, access, sig, COPROC_REGISTERS, reg, COPROC_FIELDS)
