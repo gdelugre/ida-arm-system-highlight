@@ -10,6 +10,7 @@
 
 from idc import *
 from idautils import *
+import idaapi
 
 global current_arch
 
@@ -1389,18 +1390,18 @@ def backtrack_fields(ea, reg, fields):
         if prev_mnem in ("LDR", "MOV", "ORR", "BIC") and GetOpnd(ea, 0) == reg:
             if prev_mnem == "LDR" and GetOpnd(ea, 1)[0] == "=":
                 bits = extract_bits(fields, Dword(GetOperandValue(ea, 1)))
-                MakeComm(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
+                make_comment(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
                 break
             elif prev_mnem == "MOV" and GetOpnd(ea, 1)[0] == "#":
                 bits = extract_bits(fields, GetOperandValue(ea, 1))
-                MakeComm(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
+                make_comment(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
                 break
             elif prev_mnem == "ORR"  and GetOpnd(ea, 2)[0] == "#":
                 bits = extract_bits(fields, GetOperandValue(ea, 2))
-                MakeComm(ea, "Set bit %s" % ", ".join([name for (abbrev,name) in bits]))
+                make_comment(ea, "Set bit %s" % ", ".join([name for (abbrev,name) in bits]))
             elif prev_mnem == "BIC"  and GetOpnd(ea, 2)[0] == "#":
                 bits = extract_bits(fields, GetOperandValue(ea, 2))
-                MakeComm(ea, "Clear bit %s" % ", ".join([name for (abbrev,name) in bits]))
+                make_comment(ea, "Clear bit %s" % ", ".join([name for (abbrev,name) in bits]))
             else:
                 break
         else:
@@ -1412,13 +1413,13 @@ def track_fields(ea, reg, fields):
         next_mnem = GetMnem(ea)[0:3]
         if next_mnem in ("TST", "TEQ") and GetOpnd(ea, 0) == reg and GetOpnd(ea, 1)[0] == "#":
             bits = extract_bits(fields, GetOperandValue(ea, 1))
-            MakeComm(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
+            make_comment(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
         elif next_mnem == "AND" and GetOpnd(ea, 1) == reg and GetOpnd(ea, 2)[0] == "#":
             bits = extract_bits(fields, GetOperandValue(ea, 2))
-            MakeComm(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
+            make_comment(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
         elif next_mnem == "LSL" and GetDisasm(ea)[3] == "S" and GetOpnd(ea, 1) == reg and GetOpnd(ea, 2)[0] == "#":
             bits = extract_bits(fields, 1 << (31 - GetOperandValue(ea, 2)))
-            MakeComm(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
+            make_comment(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
         else:
             break
 
@@ -1426,7 +1427,7 @@ def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields 
     desc = known_regs.get(sig, None)
     if desc:
         cmt = ("[%s] " + "\n or ".join(["%s (%s)"] * (len(desc) / 2))) % ((access,) + desc)
-        MakeComm(ea, cmt)
+        make_comment(ea, cmt)
         print(cmt)
 
         # Try to resolve fields during a write operation.
@@ -1438,7 +1439,7 @@ def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields 
                 track_fields(ea, cpu_reg, fields)
     else:
         print("Cannot identify system register.")
-        MakeComm(ea, "[%s] Unknown system register." % access)
+        make_comment(ea, "[%s] Unknown system register." % access)
 
 def markup_coproc_reg64_insn(ea):
     if GetMnem(ea)[1] == "R":
@@ -1489,20 +1490,20 @@ def markup_psr_insn(ea):
         i = (psr & (1 << 7)) and 'I' or '-'
         f = (psr & (1 << 6)) and 'F' or '-'
         t = (psr & (1 << 5)) and 'T' or '-'
-        MakeComm(ea, "Set CPSR [%c%c%c%c%c], Mode: %s" % (e,a,i,f,t,mode))
+        make_comment(ea, "Set CPSR [%c%c%c%c%c], Mode: %s" % (e,a,i,f,t,mode))
 
 def markup_pstate_insn(ea):
     if GetOpnd(ea,0)[0] == "#" and GetOpnd(ea,1)[0] == "#":
         op = PSTATE_OPS.get(GetOperandValue(ea, 0), "Unknown")
         value = GetOperandValue(ea, 1)
         if op == "SPSel":
-            MakeComm(ea, "Select PSTATE.SP = SP_EL%c" % ('0', 'x')[value & 1])
+            make_comment(ea, "Select PSTATE.SP = SP_EL%c" % ('0', 'x')[value & 1])
         elif op[0:4] == "DAIF":
             d = (value & (1 << 3)) and 'D' or '-'
             a = (value & (1 << 2)) and 'A' or '-'
             i = (value & (1 << 1)) and 'I' or '-'
             f = (value & (1 << 0)) and 'F' or '-'
-            MakeComm(ea, "%s PSTATE.DAIF [%c%c%c%c]" % (op[4:7], d,a,i,f))
+            make_comment(ea, "%s PSTATE.DAIF [%c%c%c%c]" % (op[4:7], d,a,i,f))
 
 def markup_system_insn(ea):
     mnem = GetMnem(ea)
@@ -1516,7 +1517,20 @@ def markup_system_insn(ea):
         markup_pstate_insn(ea)
     elif current_arch == 'aarch64' and mnem[0:3] in ("MSR", "MRS"):
         markup_aarch64_sys_insn(ea)
-    SetColor(ea, CIC_ITEM, 0x00000000) # Black background, adjust to your own theme
+
+def make_comment(ea, cmt):
+    # Make comment in disassembly
+    MakeComm(ea, cmt)
+
+    # Make comment in decompiler output
+    cfunc = idaapi.decompile(ea)
+    if not cfunc:
+        return
+    tl = idaapi.treeloc_t()
+    tl.ea = ea
+    tl.itp = idaapi.ITP_SEMI
+    cfunc.set_user_cmt(tl, cmt)
+    cfunc.save_user_cmts()
 
 def current_arch_size():
     _, t, _ = ParseType("void *", 0)
