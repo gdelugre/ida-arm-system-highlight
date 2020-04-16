@@ -1372,35 +1372,35 @@ def extract_bits(bitmap, value):
     return [ bitmap[b] for b in bitmap if value & (1 << b) ]
 
 def is_system_insn(ea):
-    mnem = GetMnem(ea)
+    mnem = print_insn_mnem(ea)
     if len(mnem) > 0:
         if mnem in SYSTEM_INSN:
             return True
-        if mnem[0:3] == "LDM" and GetOpnd(ea, 1)[-1:] == "^":
+        if mnem[0:3] == "LDM" and print_operand(ea, 1)[-1:] == "^":
             return True
-        if mnem[0:4] in ("SUBS", "MOVS") and GetOpnd(ea, 0) == "PC" and GetOpnd(ea, 1) == "LR":
+        if mnem[0:4] in ("SUBS", "MOVS") and print_operand(ea, 0) == "PC" and print_operand(ea, 1) == "LR":
             return True
     return False
 
 def backtrack_fields(ea, reg, fields):
     while True:
         ea -= ItemSize(ea)
-        prev_mnem = GetMnem(ea)[0:3]
-        if prev_mnem in ("LDR", "MOV", "ORR", "BIC") and GetOpnd(ea, 0) == reg:
-            if prev_mnem == "LDR" and GetOpnd(ea, 1)[0] == "=":
-                bits = extract_bits(fields, Dword(GetOperandValue(ea, 1)))
-                MakeComm(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
+        prev_mnem = print_insn_mnem(ea)[0:3]
+        if prev_mnem in ("LDR", "MOV", "ORR", "BIC") and print_operand(ea, 0) == reg:
+            if prev_mnem == "LDR" and print_operand(ea, 1)[0] == "=":
+                bits = extract_bits(fields, Dword(get_operand_value(ea, 1)))
+                set_cmt(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
                 break
-            elif prev_mnem == "MOV" and GetOpnd(ea, 1)[0] == "#":
-                bits = extract_bits(fields, GetOperandValue(ea, 1))
-                MakeComm(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
+            elif prev_mnem == "MOV" and print_operand(ea, 1)[0] == "#":
+                bits = extract_bits(fields, get_operand_value(ea, 1))
+                set_cmt(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
                 break
-            elif prev_mnem == "ORR"  and GetOpnd(ea, 2)[0] == "#":
-                bits = extract_bits(fields, GetOperandValue(ea, 2))
-                MakeComm(ea, "Set bit %s" % ", ".join([name for (abbrev,name) in bits]))
-            elif prev_mnem == "BIC"  and GetOpnd(ea, 2)[0] == "#":
-                bits = extract_bits(fields, GetOperandValue(ea, 2))
-                MakeComm(ea, "Clear bit %s" % ", ".join([name for (abbrev,name) in bits]))
+            elif prev_mnem == "ORR"  and print_operand(ea, 2)[0] == "#":
+                bits = extract_bits(fields, get_operand_value(ea, 2))
+                set_cmt(ea, "Set bit %s" % ", ".join([name for (abbrev,name) in bits]))
+            elif prev_mnem == "BIC"  and print_operand(ea, 2)[0] == "#":
+                bits = extract_bits(fields, get_operand_value(ea, 2))
+                set_cmt(ea, "Clear bit %s" % ", ".join([name for (abbrev,name) in bits]))
             else:
                 break
         else:
@@ -1409,16 +1409,16 @@ def backtrack_fields(ea, reg, fields):
 def track_fields(ea, reg, fields):
     while True:
         ea += ItemSize(ea)
-        next_mnem = GetMnem(ea)[0:3]
-        if next_mnem in ("TST", "TEQ") and GetOpnd(ea, 0) == reg and GetOpnd(ea, 1)[0] == "#":
-            bits = extract_bits(fields, GetOperandValue(ea, 1))
-            MakeComm(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
-        elif next_mnem == "AND" and GetOpnd(ea, 1) == reg and GetOpnd(ea, 2)[0] == "#":
-            bits = extract_bits(fields, GetOperandValue(ea, 2))
-            MakeComm(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
-        elif next_mnem == "LSL" and GetDisasm(ea)[3] == "S" and GetOpnd(ea, 1) == reg and GetOpnd(ea, 2)[0] == "#":
-            bits = extract_bits(fields, 1 << (31 - GetOperandValue(ea, 2)))
-            MakeComm(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
+        next_mnem = print_insn_mnem(ea)[0:3]
+        if next_mnem in ("TST", "TEQ") and print_operand(ea, 0) == reg and print_operand(ea, 1)[0] == "#":
+            bits = extract_bits(fields, get_operand_value(ea, 1))
+            set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
+        elif next_mnem == "AND" and print_operand(ea, 1) == reg and print_operand(ea, 2)[0] == "#":
+            bits = extract_bits(fields, get_operand_value(ea, 2))
+            set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
+        elif next_mnem == "LSL" and GetDisasm(ea)[3] == "S" and print_operand(ea, 1) == reg and print_operand(ea, 2)[0] == "#":
+            bits = extract_bits(fields, 1 << (31 - get_operand_value(ea, 2)))
+            set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
         else:
             break
 
@@ -1426,7 +1426,7 @@ def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields 
     desc = known_regs.get(sig, None)
     if desc:
         cmt = ("[%s] " + "\n or ".join(["%s (%s)"] * (len(desc) / 2))) % ((access,) + desc)
-        MakeComm(ea, cmt)
+        set_cmt(ea, cmt)
         print(cmt)
 
         # Try to resolve fields during a write operation.
@@ -1438,34 +1438,34 @@ def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields 
                 track_fields(ea, cpu_reg, fields)
     else:
         print("Cannot identify system register.")
-        MakeComm(ea, "[%s] Unknown system register." % access)
+        set_cmt(ea, "[%s] Unknown system register." % access)
 
 def markup_coproc_reg64_insn(ea):
-    if GetMnem(ea)[1] == "R":
+    if print_insn_mnem(ea)[1] == "R":
         access = '<'
     else:
         access = '>'
-    op1 = GetOperandValue(ea, 0)
+    op1 = get_operand_value(ea, 0)
     cp = "p%d" % DecodeInstruction(ea).Op1.specflag1
-    reg1, reg2, crm = GetOpnd(ea, 1).split(',')
+    reg1, reg2, crm = print_operand(ea, 1).split(',')
 
     sig = ( cp, op1, crm )
     identify_register(ea, access, sig, COPROC_REGISTERS_64)
 
 def markup_coproc_insn(ea):
-    if GetMnem(ea)[1] == "R":
+    if print_insn_mnem(ea)[1] == "R":
         access = '<'
     else:
         access = '>'
-    op1, op2 = GetOperandValue(ea, 0), GetOperandValue(ea, 2)
-    reg, crn, crm = GetOpnd(ea, 1).split(',')
+    op1, op2 = get_operand_value(ea, 0), get_operand_value(ea, 2)
+    reg, crn, crm = print_operand(ea, 1).split(',')
     cp = "p%d" % DecodeInstruction(ea).Op1.specflag1
 
     sig = ( cp, crn, op1, crm, op2 )
     identify_register(ea, access, sig, COPROC_REGISTERS, reg, COPROC_FIELDS)
 
 def markup_aarch64_sys_insn(ea):
-    if GetMnem(ea)[1] == "R":
+    if print_insn_mnem(ea)[1] == "R":
         reg_pos = 0
         access = '<'
     else:
@@ -1473,65 +1473,65 @@ def markup_aarch64_sys_insn(ea):
         access = '>'
     base_args = (reg_pos + 1) % 5
     op0 = 2 + ((Dword(ea) >> 19) & 1)
-    op1, op2 = GetOperandValue(ea, base_args), GetOperandValue(ea, base_args + 3)
-    crn, crm = GetOpnd(ea, base_args + 1), GetOpnd(ea, base_args + 2)
-    reg = GetOpnd(ea, reg_pos)
+    op1, op2 = get_operand_value(ea, base_args), get_operand_value(ea, base_args + 3)
+    crn, crm = print_operand(ea, base_args + 1), print_operand(ea, base_args + 2)
+    reg = print_operand(ea, reg_pos)
 
     sig = ( op0, op1, crn, crm, op2 )
     identify_register(ea, access, sig, SYSTEM_REGISTERS, reg, SYSREG_FIELDS)
 
 def markup_psr_insn(ea):
-    if GetOpnd(ea,1)[0] == "#": # immediate
-        psr = GetOperandValue(ea, 1)
+    if print_operand(ea,1)[0] == "#": # immediate
+        psr = get_operand_value(ea, 1)
         mode = ARM_MODES.get(psr & 0b11111, "Unknown")
         e = (psr & (1 << 9)) and 'E' or '-'
         a = (psr & (1 << 8)) and 'A' or '-'
         i = (psr & (1 << 7)) and 'I' or '-'
         f = (psr & (1 << 6)) and 'F' or '-'
         t = (psr & (1 << 5)) and 'T' or '-'
-        MakeComm(ea, "Set CPSR [%c%c%c%c%c], Mode: %s" % (e,a,i,f,t,mode))
+        set_cmt(ea, "Set CPSR [%c%c%c%c%c], Mode: %s" % (e,a,i,f,t,mode))
 
 def markup_pstate_insn(ea):
-    if GetOpnd(ea,0)[0] == "#" and GetOpnd(ea,1)[0] == "#":
-        op = PSTATE_OPS.get(GetOperandValue(ea, 0), "Unknown")
-        value = GetOperandValue(ea, 1)
+    if print_operand(ea,0)[0] == "#" and print_operand(ea,1)[0] == "#":
+        op = PSTATE_OPS.get(get_operand_value(ea, 0), "Unknown")
+        value = get_operand_value(ea, 1)
         if op == "SPSel":
-            MakeComm(ea, "Select PSTATE.SP = SP_EL%c" % ('0', 'x')[value & 1])
+            set_cmt(ea, "Select PSTATE.SP = SP_EL%c" % ('0', 'x')[value & 1])
         elif op[0:4] == "DAIF":
             d = (value & (1 << 3)) and 'D' or '-'
             a = (value & (1 << 2)) and 'A' or '-'
             i = (value & (1 << 1)) and 'I' or '-'
             f = (value & (1 << 0)) and 'F' or '-'
-            MakeComm(ea, "%s PSTATE.DAIF [%c%c%c%c]" % (op[4:7], d,a,i,f))
+            set_cmt(ea, "%s PSTATE.DAIF [%c%c%c%c]" % (op[4:7], d,a,i,f))
 
 def markup_system_insn(ea):
-    mnem = GetMnem(ea)
+    mnem = print_insn_mnem(ea)
     if mnem[0:4] in ("MRRC", "MCRR"):
         markup_coproc_reg64_insn(ea)
     elif mnem[0:3] in ("MRC", "MCR"):
         markup_coproc_insn(ea)
     elif current_arch == 'aarch32' and mnem[0:3] == "MSR":
         markup_psr_insn(ea)
-    elif current_arch == 'aarch64' and mnem[0:3] == "MSR" and not GetOpnd(ea, 2):
+    elif current_arch == 'aarch64' and mnem[0:3] == "MSR" and not print_operand(ea, 2):
         markup_pstate_insn(ea)
     elif current_arch == 'aarch64' and mnem[0:3] in ("MSR", "MRS"):
         markup_aarch64_sys_insn(ea)
-    SetColor(ea, CIC_ITEM, 0x00000000) # Black background, adjust to your own theme
+    set_color(ea, CIC_ITEM, 0x00000000) # Black background, adjust to your own theme
 
 def current_arch_size():
-    _, t, _ = ParseType("void *", 0)
+    _, t, _ = parse_decl("void *", 0)
     return SizeOf(t) * 8
 
 def run_script():
     for addr in Heads():
         if is_system_insn(addr):
-            print("Found system instruction %s at %08x" % ( GetMnem(addr), addr ))
+            print("Found system instruction %s at %08x" % ( print_insn_mnem(addr), addr ))
             markup_system_insn(addr)
 
 #
 # Check we are running this script on an ARM architecture.
 #
-if GetLongPrm(INF_PROCNAME) != 'ARM':
+if get_inf_attr(INF_PROCNAME) != 'ARM':
     Warning("This script can only work with ARM and AArch64 architectures.")
 else:
     current_arch = 'aarch64' if current_arch_size() == 64 else 'aarch32'
