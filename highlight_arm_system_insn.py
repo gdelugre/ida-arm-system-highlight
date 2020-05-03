@@ -1384,23 +1384,23 @@ def is_system_insn(ea):
 
 def backtrack_fields(ea, reg, fields):
     while True:
-        ea -= ItemSize(ea)
+        ea -= get_item_size(ea)
         prev_mnem = print_insn_mnem(ea)[0:3]
         if prev_mnem in ("LDR", "MOV", "ORR", "BIC") and print_operand(ea, 0) == reg:
             if prev_mnem == "LDR" and print_operand(ea, 1)[0] == "=":
-                bits = extract_bits(fields, Dword(get_operand_value(ea, 1)))
-                set_cmt(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
+                bits = extract_bits(fields, get_wide_dword(get_operand_value(ea, 1)))
+                set_cmt(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]), 0)
                 break
             elif prev_mnem == "MOV" and print_operand(ea, 1)[0] == "#":
                 bits = extract_bits(fields, get_operand_value(ea, 1))
-                set_cmt(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]))
+                set_cmt(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]), 0)
                 break
             elif prev_mnem == "ORR"  and print_operand(ea, 2)[0] == "#":
                 bits = extract_bits(fields, get_operand_value(ea, 2))
-                set_cmt(ea, "Set bit %s" % ", ".join([name for (abbrev,name) in bits]))
+                set_cmt(ea, "Set bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
             elif prev_mnem == "BIC"  and print_operand(ea, 2)[0] == "#":
                 bits = extract_bits(fields, get_operand_value(ea, 2))
-                set_cmt(ea, "Clear bit %s" % ", ".join([name for (abbrev,name) in bits]))
+                set_cmt(ea, "Clear bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
             else:
                 break
         else:
@@ -1408,17 +1408,17 @@ def backtrack_fields(ea, reg, fields):
 
 def track_fields(ea, reg, fields):
     while True:
-        ea += ItemSize(ea)
+        ea += get_item_size(ea)
         next_mnem = print_insn_mnem(ea)[0:3]
         if next_mnem in ("TST", "TEQ") and print_operand(ea, 0) == reg and print_operand(ea, 1)[0] == "#":
             bits = extract_bits(fields, get_operand_value(ea, 1))
-            set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
+            set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
         elif next_mnem == "AND" and print_operand(ea, 1) == reg and print_operand(ea, 2)[0] == "#":
             bits = extract_bits(fields, get_operand_value(ea, 2))
-            set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
+            set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
         elif next_mnem == "LSL" and GetDisasm(ea)[3] == "S" and print_operand(ea, 1) == reg and print_operand(ea, 2)[0] == "#":
             bits = extract_bits(fields, 1 << (31 - get_operand_value(ea, 2)))
-            set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]))
+            set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
         else:
             break
 
@@ -1426,7 +1426,7 @@ def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields 
     desc = known_regs.get(sig, None)
     if desc:
         cmt = ("[%s] " + "\n or ".join(["%s (%s)"] * (len(desc) / 2))) % ((access,) + desc)
-        set_cmt(ea, cmt)
+        set_cmt(ea, cmt, 0)
         print(cmt)
 
         # Try to resolve fields during a write operation.
@@ -1438,7 +1438,7 @@ def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields 
                 track_fields(ea, cpu_reg, fields)
     else:
         print("Cannot identify system register.")
-        set_cmt(ea, "[%s] Unknown system register." % access)
+        set_cmt(ea, "[%s] Unknown system register." % access, 0)
 
 def markup_coproc_reg64_insn(ea):
     if print_insn_mnem(ea)[1] == "R":
@@ -1472,7 +1472,7 @@ def markup_aarch64_sys_insn(ea):
         reg_pos = 4
         access = '>'
     base_args = (reg_pos + 1) % 5
-    op0 = 2 + ((Dword(ea) >> 19) & 1)
+    op0 = 2 + ((get_wide_dword(ea) >> 19) & 1)
     op1, op2 = get_operand_value(ea, base_args), get_operand_value(ea, base_args + 3)
     crn, crm = print_operand(ea, base_args + 1), print_operand(ea, base_args + 2)
     reg = print_operand(ea, reg_pos)
@@ -1489,20 +1489,20 @@ def markup_psr_insn(ea):
         i = (psr & (1 << 7)) and 'I' or '-'
         f = (psr & (1 << 6)) and 'F' or '-'
         t = (psr & (1 << 5)) and 'T' or '-'
-        set_cmt(ea, "Set CPSR [%c%c%c%c%c], Mode: %s" % (e,a,i,f,t,mode))
+        set_cmt(ea, "Set CPSR [%c%c%c%c%c], Mode: %s" % (e,a,i,f,t,mode), 0)
 
 def markup_pstate_insn(ea):
     if print_operand(ea,0)[0] == "#" and print_operand(ea,1)[0] == "#":
         op = PSTATE_OPS.get(get_operand_value(ea, 0), "Unknown")
         value = get_operand_value(ea, 1)
         if op == "SPSel":
-            set_cmt(ea, "Select PSTATE.SP = SP_EL%c" % ('0', 'x')[value & 1])
+            set_cmt(ea, "Select PSTATE.SP = SP_EL%c" % ('0', 'x')[value & 1], 0)
         elif op[0:4] == "DAIF":
             d = (value & (1 << 3)) and 'D' or '-'
             a = (value & (1 << 2)) and 'A' or '-'
             i = (value & (1 << 1)) and 'I' or '-'
             f = (value & (1 << 0)) and 'F' or '-'
-            set_cmt(ea, "%s PSTATE.DAIF [%c%c%c%c]" % (op[4:7], d,a,i,f))
+            set_cmt(ea, "%s PSTATE.DAIF [%c%c%c%c]" % (op[4:7], d,a,i,f), 0)
 
 def markup_system_insn(ea):
     mnem = print_insn_mnem(ea)
