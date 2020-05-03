@@ -1531,8 +1531,8 @@ def run_script():
 #
 # Check we are running this script on an ARM architecture.
 #
-if get_inf_attr(INF_PROCNAME) != 'ARM':
-    Warning("This script can only work with ARM and AArch64 architectures.")
-else:
+if get_inf_attr(INF_PROCNAME) in ('ARM', 'ARMB'):
     current_arch = 'aarch64' if current_arch_size() == 64 else 'aarch32'
     run_script()
+else:
+    Warning("This script can only work with ARM and AArch64 architectures.")
