@@ -1425,7 +1425,7 @@ def track_fields(ea, reg, fields):
 def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields = {}):
     desc = known_regs.get(sig, None)
     if desc:
-        cmt = ("[%s] " + "\n or ".join(["%s (%s)"] * (len(desc) / 2))) % ((access,) + desc)
+        cmt = ("[%s] " + "\n or ".join(["%s (%s)"] * (len(desc) // 2))) % ((access,) + desc)
         set_cmt(ea, cmt, 0)
         print(cmt)
 
