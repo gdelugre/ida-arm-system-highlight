@@ -1502,7 +1502,7 @@ PSTATE_OPS = {
 }
 
 def extract_bits(bitmap, value):
-    return [ bitmap[b] for b in bitmap if value & (1 << b) ]
+    return (bitmap[b] for b in bitmap if value & (1 << b))
 
 def is_system_insn(ea):
     mnem = print_insn_mnem(ea)
@@ -1518,27 +1518,63 @@ def is_system_insn(ea):
 def is_same_register(reg0, reg1):
     return (reg0 == reg1) or (current_arch == 'aarch64' and reg0[1:] == reg1[1:] and ((reg0[0] == 'W' and reg1[0] == 'X') or (reg0[0] == 'X' and reg1[0] == 'W')))
 
-def backtrack_fields(ea, reg, fields):
+def backtrack_can_skip_insn(ea, reg):
+    mnem = print_insn_mnem(ea)
+    if mnem in ("NOP", "ISB", "DSB", "DMB", "MSR", "MCR", "MCRR", "MCRR", "MCRR2", "CMP") or mnem[0:3] in ("STR", "STM"):
+        return True
+
+    if mnem[0:3] == "UBF" and not is_same_register(print_operand(ea, 0), reg):
+        return True
+
+    if mnem in ("LDR", "MRS", "ORR", "BIC", "MOV", "LSR", "LSL", "ADD", "SUB") and not is_same_register(print_operand(ea, 0), reg):
+        return True
+
+    return False
+
+def is_general_register(operand):
+    if operand in ('FP', 'SP', 'LR', 'PC'):
+        return True
+    if current_arch == 'aarch64':
+        return operand[0] in ('W', 'X') and operand[1:].isdigit()
+    else:
+        return operand[0] == 'R' and operand[1:].isdigit()
+
+def backtrack_fields(ea, reg, fields, cmt_type = None):
+    cmt_formatter = {
+        "LDR": lambda bits: "Set bits %s" % ", ".join(name for (name, desc) in bits),
+        "MOV": lambda bits: "Set bits %s" % ", ".join(name for (name, desc) in bits),
+        "ORR": lambda bits: "Set bit %s" % ", ".join(desc for (name, desc) in bits),
+        "BIC": lambda bits: "Clear bit %s" % ", ".join(desc for (name, desc) in bits),
+    }
+
     while True:
         ea -= get_item_size(ea)
         prev_mnem = print_insn_mnem(ea)[0:3]
         if prev_mnem in ("LDR", "MOV", "ORR", "BIC") and is_same_register(print_operand(ea, 0), reg):
             if prev_mnem == "LDR" and print_operand(ea, 1)[0] == "=":
                 bits = extract_bits(fields, get_wide_dword(get_operand_value(ea, 1)))
-                set_cmt(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]), 0)
+                set_cmt(ea, cmt_formatter[cmt_type or prev_mnem](bits), 0)
                 break
             elif prev_mnem == "MOV" and print_operand(ea, 1)[0] == "#":
                 bits = extract_bits(fields, get_operand_value(ea, 1))
-                set_cmt(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]), 0)
+                set_cmt(ea, cmt_formatter[cmt_type or prev_mnem](bits), 0)
                 break
+            elif prev_mnem == "MOV" is is_general_register(print_operand(ea, 1)):
+                return backtrack_fields(ea, print_operand(ea, 1), fields, (cmt_type or prev_mnem))
             elif prev_mnem == "ORR"  and print_operand(ea, 2)[0] == "#":
                 bits = extract_bits(fields, get_operand_value(ea, 2))
-                set_cmt(ea, "Set bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
+                set_cmt(ea, cmt_formatter[cmt_type or prev_mnem](bits), 0)
+            elif prev_mnem == "ORR" and is_general_register(print_operand(ea, 2)):
+                return backtrack_fields(ea, print_operand(ea, 2), fields, (cmt_type or prev_mnem))
             elif prev_mnem == "BIC"  and print_operand(ea, 2)[0] == "#":
                 bits = extract_bits(fields, get_operand_value(ea, 2))
-                set_cmt(ea, "Clear bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
+                set_cmt(ea, cmt_formatter[cmt_type or prev_mnem](bits), 0)
+            elif prev_mnem == "BIC" and is_general_register(get_operand_value(ea, 2)):
+                return backtrack_fields(ea, print_operand(ea, 2), fields, (cmt_type or prev_mnem))
             else:
                 break
+        elif backtrack_can_skip_insn(ea, reg):
+            continue
         else:
             break
 
@@ -1548,13 +1584,13 @@ def track_fields(ea, reg, fields):
         next_mnem = print_insn_mnem(ea)[0:3]
         if next_mnem in ("TST", "TEQ") and is_same_register(print_operand(ea, 0), reg) and print_operand(ea, 1)[0] == "#":
             bits = extract_bits(fields, get_operand_value(ea, 1))
-            set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
+            set_cmt(ea, "Test bit %s" % ", ".join(desc for (name, desc) in bits), 0)
         elif next_mnem == "AND" and is_same_register(print_operand(ea, 1), reg) and print_operand(ea, 2)[0] == "#":
             bits = extract_bits(fields, get_operand_value(ea, 2))
-            set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
+            set_cmt(ea, "Test bit %s" % ", ".join(desc for (name, desc) in bits), 0)
         elif next_mnem == "LSL" and GetDisasm(ea)[3] == "S" and is_same_register(print_operand(ea, 1), reg) and print_operand(ea, 2)[0] == "#":
             bits = extract_bits(fields, 1 << (31 - get_operand_value(ea, 2)))
-            set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
+            set_cmt(ea, "Test bit %s" % ", ".join(desc for (name, desc) in bits), 0)
         else:
             break
 
