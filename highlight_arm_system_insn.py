@@ -51,6 +51,15 @@ SYSTEM_INSN = (
     "AUTDA", "AUTDZA", "AUTDB", "AUTDZB",
     "AUTIA", "AUTIA1716", "AUTIASP", "AUTIAZ", "AUTIZA",
     "AUTIB", "AUTIB1716", "AUTIBSP", "AUTIBZ", "AUTIZB",
+
+    # Crypto
+    "AESE", "AESMC", "AESD",
+    "BCAX", "EOR3", "RAX1", "XAR",
+    "SHA1C", "SHA1H", "SHA1M", "SHA1P", "SHA1SU0", "SHA1SU1",
+    "SHA256H2", "SHA256H", "SHA256SU0", "SHA256SU1",
+    "SHA512H2", "SHA512H", "SHA512SU0", "SHA512SU1",
+    "SM3PARTW1", "SM3PARTW2", "SM3SS1", "SM3TT1A", "SM3TT1B", "SM3TT2A", "SM3TT2B",
+    "SM4E", "SM4EKEY",
 )
 
 # 64 bits registers accessible from AArch32.
