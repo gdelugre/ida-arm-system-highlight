@@ -1515,11 +1515,14 @@ def is_system_insn(ea):
             return True
     return False
 
+def is_same_register(reg0, reg1):
+    return (reg0 == reg1) or (current_arch == 'aarch64' and reg0[1:] == reg1[1:] and ((reg0[0] == 'W' and reg1[0] == 'X') or (reg0[0] == 'X' and reg1[0] == 'W')))
+
 def backtrack_fields(ea, reg, fields):
     while True:
         ea -= get_item_size(ea)
         prev_mnem = print_insn_mnem(ea)[0:3]
-        if prev_mnem in ("LDR", "MOV", "ORR", "BIC") and print_operand(ea, 0) == reg:
+        if prev_mnem in ("LDR", "MOV", "ORR", "BIC") and is_same_register(print_operand(ea, 0), reg):
             if prev_mnem == "LDR" and print_operand(ea, 1)[0] == "=":
                 bits = extract_bits(fields, get_wide_dword(get_operand_value(ea, 1)))
                 set_cmt(ea, "Set bits %s" % ", ".join([abbrev for (abbrev,name) in bits]), 0)
@@ -1543,13 +1546,13 @@ def track_fields(ea, reg, fields):
     while True:
         ea += get_item_size(ea)
         next_mnem = print_insn_mnem(ea)[0:3]
-        if next_mnem in ("TST", "TEQ") and print_operand(ea, 0) == reg and print_operand(ea, 1)[0] == "#":
+        if next_mnem in ("TST", "TEQ") and is_same_register(print_operand(ea, 0), reg) and print_operand(ea, 1)[0] == "#":
             bits = extract_bits(fields, get_operand_value(ea, 1))
             set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
-        elif next_mnem == "AND" and print_operand(ea, 1) == reg and print_operand(ea, 2)[0] == "#":
+        elif next_mnem == "AND" and is_same_register(print_operand(ea, 1), reg) and print_operand(ea, 2)[0] == "#":
             bits = extract_bits(fields, get_operand_value(ea, 2))
             set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
-        elif next_mnem == "LSL" and GetDisasm(ea)[3] == "S" and print_operand(ea, 1) == reg and print_operand(ea, 2)[0] == "#":
+        elif next_mnem == "LSL" and GetDisasm(ea)[3] == "S" and is_same_register(print_operand(ea, 1), reg) and print_operand(ea, 2)[0] == "#":
             bits = extract_bits(fields, 1 << (31 - get_operand_value(ea, 2)))
             set_cmt(ea, "Test bit %s" % ", ".join([name for (abbrev,name) in bits]), 0)
         else:
