@@ -1926,7 +1926,7 @@ def backtrack_fields(ea, reg, fields, cmt_type = None):
             elif prev_mnem == "BIC"  and print_operand(ea, 2)[0] == "#":
                 bits = extract_bits(fields, get_operand_value(ea, 2))
                 set_cmt(ea, cmt_formatter[cmt_type or prev_mnem](bits), 0)
-            elif prev_mnem == "BIC" and is_general_register(get_operand_value(ea, 2)):
+            elif prev_mnem == "BIC" and is_general_register(print_operand(ea, 2)):
                 return backtrack_fields(ea, print_operand(ea, 2), fields, (cmt_type or prev_mnem))
             else:
                 break
