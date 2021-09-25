@@ -1541,6 +1541,9 @@ COPROC_FIELDS = {
 
 # Aarch64 fields.
 SYSREG_FIELDS = {
+        "CurrentEL" : {
+            (2, 2) : ( "EL", "Current Exception Level" )
+        },
         "DAIF" : {
             6 : ( "F", "FIQ mask" ),
             7 : ( "I", "IRQ mask" ),
@@ -1634,7 +1637,8 @@ SYSREG_FIELDS = {
             56 : ( "ATA", "Allocation Tag Access" ),
             57 : ( "DCT", "Default Cacheability Tagging" ),
             58 : ( "TID5", "Trap ID Group 5" ),
-            59 : ( "TWEDEn", "TWE Delay Enable" )
+            59 : ( "TWEDEn", "TWE Delay Enable" ),
+            (60, 4): ( "TWEDEL", "TWE Delay" )
         },
         "SCR_EL3" : {
             0 : ( "NS", "Non-secure" ),
@@ -1661,6 +1665,7 @@ SYSREG_FIELDS = {
             27 : ( "FGTEn", "Fine-Grained Traps Enable" ),
             28 : ( "ECVEn", "ECV Enable" ),
             29 : ( "TWEDEn", "TWE Delay Enable" ),
+            (30, 4) : ( "TWEDEL", "TWE Delay" ),
             35 : ( "AMVOFFEN", "Activity Monitors Virtual Offsets Enable" ),
             36 : ( "EnAS0", "Trap execution of an ST64BV0 instruction at EL0, EL1, or EL2 to EL3" ),
             37 : ( "ADEn", "Enable access to the ACCDATA_EL1 register at EL1 and EL2" ),
@@ -1701,10 +1706,13 @@ SYSREG_FIELDS = {
             35 : ( "BT0", "PAC Branch Type compatibility at EL0" ),
             36 : ( "BT1", "PAC Branch Type compatibility at EL1" ),
             37 : ( "ITFSB", "Tag Check Faults are synchronized on entry to EL1" ),
+            (38, 2) : ( "TCF0", "Tag Check Fault in EL0" ),
+            (40, 2) : ( "TCF", "Tag Check Fault in EL1" ),
             42 : ( "ATA0", "Allocation Tag Access in EL0" ),
             43 : ( "ATA1", "Allocation Tag Access in EL1" ),
             44 : ( "DSSBS", "Default PSTATE.SSBS value on Exception Entry" ),
             45 : ( "TWEDEn", "TWE Delay Enable" ),
+            (46, 4) : ( "TWEDEL", "TWE Delay" ),
             54 : ( "EnASR", "When HCR_EL2.{E2H, TGE} != {1, 1}, traps execution of an ST64BV instruction at EL0 to EL1" ),
             55 : ( "EnAS0", "When HCR_EL2.{E2H, TGE} != {1, 1}, traps execution of an ST64BV0 instruction at EL0 to EL1" ),
             56 : ( "EnALS", "When HCR_EL2.{E2H, TGE} != {1, 1}, traps execution of an LD64B or ST64B instruction at EL0 to EL1" ),
@@ -1744,10 +1752,13 @@ SYSREG_FIELDS = {
             35 : ( "BT0", "PAC Branch Type compatibility at EL0" ),
             36 : ( "BT", "PAC Branch Type compatibility at EL2" ),
             37 : ( "ITFSB", "Tag Check Faults are synchronized on entry to EL2" ),
+            (38, 2) : ( "TCF0", "Tag Check Fault in EL0" ),
+            (40, 2) : ( "TCF", "Tag Check Fault in EL2" ),
             42 : ( "ATA0", "Allocation Tag Access in EL0" ),
             43 : ( "ATA", "Allocation Tag Access in EL2" ),
             44 : ( "DSSBS", "Default PSTATE.SSBS value on Exception Entry" ),
             45 : ( "TWEDEn", "TWE Delay Enable" ),
+            (46, 4) : ( "TWEDEL", "TWE Delay" ),
             54 : ( "EnASR", "Trap execution of an ST64BV instruction at EL0 to EL2" ),
             55 : ( "EnAS0", "Trap execution of an ST64BV0 instruction at EL0 to EL2" ),
             56 : ( "EnALS", "Trap execution of an LD64B or ST64B instruction at EL0 to EL2" ),
@@ -1774,6 +1785,54 @@ SYSREG_FIELDS = {
             43 : ( "ATA", "Allocation Tag Access in EL3" ),
             44 : ( "DSSBS", "Default PSTATE.SSBS value on Exception Entry" )
         },
+        "ID_AA64PFR0_EL1" : {
+            (0, 4) : ( "EL0", "EL0 Exception level handling" ),
+            (4, 4) : ( "EL1", "EL1 Exception level handling" ),
+            (8, 4) : ( "EL2", "EL2 Exception level handling" ),
+            (12, 4) : ( "EL3", "EL3 Exceptino level handling" ),
+            (16, 4) : ( "FP", "Floating-point" ),
+            (20, 4) : ( "AdvSIMD", "Advanced SIMD" ),
+            (24, 4) : ( "GIC", "System register GIC CPU interface" ),
+            (28, 4) : ( "RAS", "RAS extension version" ),
+            (32, 4) : ( "SVE", "Scalable Vector Extension" ),
+            (36, 4) : ( "SEL2", "Secure EL2" ),
+            (40, 4) : ( "MPAM", "MPAM Extension" ),
+            (44, 4) : ( "AMU", "Activity Monitors Extension" ),
+            (48, 4) : ( "DIT", "Data Independent Timing" ),
+            (56, 4) : ( "CSV2", "Speculative use of out of context branch targets" ),
+            (60, 4) : ( "CSV3", "Speculative use of faulting data" )
+        },
+        "ID_AA64PFR1_EL1" : {
+            (0, 4)  : ( "BT", "Branch Target Identification" ),
+            (4, 4)  : ( "SSBS", "Speculative Store Bypassing" ),
+            (8, 4)  : ( "MTE", " Memory Tagging Extension" ),
+            (12, 4) : ( "RAS_frac", "RAS Extension fractional field" ),
+            (16, 4) : ( "MPAM_frac", "MPAM Extension fractional field" ),
+            (32, 4) : ( "CSV2_frac", "CSV2 fractional field" ),
+        },
+        "MPIDR_EL1" : {
+            (0, 8)  : ( "Aff0", "Affinity level 0" ),
+            (8, 8)  : ( "Aff1", "Affinity level 1" ),
+            (16, 8) : ( "Aff2", "Affinity level 2" ),
+            24      : ( "MT", "MT" ),
+            30      : ( "U", "Uniprocessor system" ),
+            (32, 8) : ( "Aff3", "Affinity level 3" ),
+        },
+        "CPACR_EL1" : {
+            (16, 2) : ( "ZEN", "Traps execution at EL1 and EL0 of SVE instructions" ),
+            (20, 2) : ( "FPEN", "Traps execution at EL1 and EL0 of instructions that access the Advanced SIMD and floating-point registers" ),
+            28      : ( "TTA", "Traps EL0 and EL1 System register accesses to all implemented trace registers" )
+        },
+        "CTR_EL0" : {
+            (0, 4)  :  ( "IminLine", "Log2 of the number of words in the smallest cache line of all the instruction caches" ),
+            (14, 2) :  ( "L1Ip", "Level 1 instruction cache policy" ),
+            (16, 4) :  ( "DminLine", "Log2 of the number of words in the smallest cache line of all the data caches and unified caches" ),
+            (20, 4) :  ( "ERG", "Exclusives reservation granule" ),
+            (24, 4) :  ( "CWG", "Cache writeback granule" ),
+            28      :  ( "IDC", "Data cache clean requirements for instruction to data coherence" ),
+            29      :  ( "DIC", "Instruction cache invalidation requirements for data to instruction coherence" ),
+            (32, 6) :  ( "TminLine", "Tag minimum Line" ),
+        }
 }
 
 ARM_MODES = {
@@ -1794,7 +1853,13 @@ PSTATE_OPS = {
 }
 
 def extract_bits(bitmap, value):
-    return (bitmap[b] for b in bitmap if value & (1 << b))
+    return (bitmap[b] for b in bitmap if (isinstance(b, int) and value & (1 << b)) or (isinstance(b, tuple) and value & (((1 << b[1])-1) << b[0])))
+
+def find_bitfield(bitmap, offset, width):
+    if width > 1:
+        return bitmap.get((offset, width), None)
+    else:
+        return bitmap.get(offset, None) or bitmap.get((offset, width), None)
 
 def is_system_insn(ea):
     mnem = print_insn_mnem(ea)
@@ -1873,16 +1938,24 @@ def backtrack_fields(ea, reg, fields, cmt_type = None):
 def track_fields(ea, reg, fields):
     while True:
         ea += get_item_size(ea)
-        next_mnem = print_insn_mnem(ea)[0:3]
-        if next_mnem in ("TST", "TEQ") and is_same_register(print_operand(ea, 0), reg) and print_operand(ea, 1)[0] == "#":
+        next_mnem = print_insn_mnem(ea)
+        if next_mnem[0:3] in ("TST", "TEQ") and is_same_register(print_operand(ea, 0), reg) and print_operand(ea, 1)[0] == "#":
             bits = extract_bits(fields, get_operand_value(ea, 1))
-            set_cmt(ea, "Test bit %s" % ", ".join(desc for (name, desc) in bits), 0)
-        elif next_mnem == "AND" and is_same_register(print_operand(ea, 1), reg) and print_operand(ea, 2)[0] == "#":
+            set_cmt(ea, "Test field %s" % ", ".join(desc for (name, desc) in bits), 0)
+        elif next_mnem[0:3] == "AND" and is_same_register(print_operand(ea, 1), reg) and print_operand(ea, 2)[0] == "#":
             bits = extract_bits(fields, get_operand_value(ea, 2))
-            set_cmt(ea, "Test bit %s" % ", ".join(desc for (name, desc) in bits), 0)
-        elif next_mnem == "LSL" and GetDisasm(ea)[3] == "S" and is_same_register(print_operand(ea, 1), reg) and print_operand(ea, 2)[0] == "#":
+            set_cmt(ea, "Field %s" % ", ".join(desc for (name, desc) in bits), 0)
+        elif next_mnem[0:3] == "LSL" and GetDisasm(ea)[3] == "S" and is_same_register(print_operand(ea, 1), reg) and print_operand(ea, 2)[0] == "#":
             bits = extract_bits(fields, 1 << (31 - get_operand_value(ea, 2)))
             set_cmt(ea, "Test bit %s" % ", ".join(desc for (name, desc) in bits), 0)
+        elif next_mnem == "UBFX" and is_same_register(print_operand(ea, 1), reg):
+            lsb = get_operand_value(ea, 2)
+            width = get_operand_value(ea, 3)
+            field = find_bitfield(fields, lsb, width)
+            if field:
+                set_cmt(ea, "Extract %s" % field[1], 0)
+        elif backtrack_can_skip_insn(ea, reg):
+            continue
         else:
             break
 
