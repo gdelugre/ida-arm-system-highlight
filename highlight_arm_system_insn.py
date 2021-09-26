@@ -1883,7 +1883,7 @@ def backtrack_can_skip_insn(ea, reg):
     if mnem[0:3] == "UBF" and not is_same_register(print_operand(ea, 0), reg):
         return True
 
-    if mnem in ("LDR", "MRS", "ORR", "BIC", "MOV", "LSR", "LSL", "ADD", "SUB") and not is_same_register(print_operand(ea, 0), reg):
+    if mnem in ("LDR", "MRS", "ORR", "AND", "EOR", "BIC", "MOV", "MOVK", "LSR", "LSL", "ADD", "SUB") and not is_same_register(print_operand(ea, 0), reg):
         return True
 
     return False
@@ -1901,44 +1901,89 @@ def movk_operand_value(ea):
     shift = int(print_operand(ea, 1).split(',')[1][4:])
     return imm << shift
 
+def register_size(reg):
+    if not is_general_register(reg):
+        return 0
+    if current_arch == 'aarch64':
+        return 4 if reg[0] == 'W' else 8
+    else:
+        return 4
+
 def backtrack_fields(ea, reg, fields, cmt_type = None):
     cmt_formatter = {
         "LDR": lambda bits: "Set bits %s" % ", ".join(name for (name, desc) in bits),
         "MOV": lambda bits: "Set bits %s" % ", ".join(name for (name, desc) in bits),
         "ORR": lambda bits: "Set bit %s" % ", ".join(desc for (name, desc) in bits),
         "BIC": lambda bits: "Clear bit %s" % ", ".join(desc for (name, desc) in bits),
+        "AND": lambda bits: "Clear bit %s" % ", \n".join(desc for (name, desc) in bits),
     }
 
     while True:
-        ea -= get_item_size(ea)
-        prev_mnem = print_insn_mnem(ea)
-        reduced_mnem = prev_mnem[0:3]
+        ea = prev_head(ea)
+        mnem = print_insn_mnem(ea)
+        reduced_mnem = mnem[0:3]
 
-        if reduced_mnem in ("LDR", "MOV", "ORR", "BIC") and is_same_register(print_operand(ea, 0), reg):
+        if reduced_mnem in ("LDR", "MOV", "ORR", "BIC", "AND") and is_same_register(print_operand(ea, 0), reg):
+            #
+            # LDR Rd, =imm
+            #
             if reduced_mnem == "LDR" and print_operand(ea, 1)[0] == "=":
                 bits = extract_bits(fields, get_wide_dword(get_operand_value(ea, 1)))
                 set_cmt(ea, cmt_formatter[cmt_type or reduced_mnem](bits), 0)
                 break
-            elif prev_mnem == "MOVK":
+            #
+            # MOVK Rd, #imm,LSL#shift
+            #
+            elif mnem == "MOVK":
                 bits = extract_bits(fields, movk_operand_value(ea))
                 set_cmt(ea, cmt_formatter[cmt_type or reduced_mnem](bits), 0)
-                break
+            #
+            # MOV Rd, #imm
+            #
             elif reduced_mnem == "MOV" and print_operand(ea, 1)[0] == "#":
                 bits = extract_bits(fields, get_operand_value(ea, 1))
                 set_cmt(ea, cmt_formatter[cmt_type or reduced_mnem](bits), 0)
                 break
+            #
+            # MOV Rd, Rn
+            #
             elif reduced_mnem == "MOV" is is_general_register(print_operand(ea, 1)):
-                return backtrack_fields(ea, print_operand(ea, 1), fields, (cmt_type or reduced_mnem))
+                backtrack_fields(ea, print_operand(ea, 1), fields, (cmt_type or reduced_mnem))
+                break
+            #
+            # ORR Rd, Rn, #imm
+            # BIC Rd, Rn, #imm
+            #
             elif reduced_mnem == "ORR"  and print_operand(ea, 2)[0] == "#":
                 bits = extract_bits(fields, get_operand_value(ea, 2))
                 set_cmt(ea, cmt_formatter[cmt_type or reduced_mnem](bits), 0)
-            elif reduced_mnem == "ORR" and is_general_register(print_operand(ea, 2)):
-                return backtrack_fields(ea, print_operand(ea, 2), fields, (cmt_type or reduced_mnem))
-            elif reduced_mnem == "BIC"  and print_operand(ea, 2)[0] == "#":
-                bits = extract_bits(fields, get_operand_value(ea, 2))
+                reg1 = print_operand(ea, 1)
+                if not is_same_register(reg1, reg):
+                    backtrack_fields(ea, reg1, fields, (cmt_type or reduced_mnem))
+                    break
+            #
+            # ORR Rd, Rn, Rm
+            # BIC Rd, Rn, Rm
+            #
+            elif reduced_mnem in ("ORR", "BIC") and is_general_register(print_operand(ea, 2)):
+                reg1, reg2 = print_operand(ea, 1), print_operand(ea, 2)
+                if not is_same_register(reg1, reg):
+                    backtrack_fields(ea, reg1, fields, (cmt_type or reduced_mnem))
+                if not is_same_register(reg2, reg):
+                    backtrack_fields(ea, reg2, fields, (cmt_type or reduced_mnem))
+                if not is_same_register(reg1, reg) and not is_same_register(reg2, reg):
+                    break
+            #
+            # AND Rd, Rn, #imm
+            #
+            elif reduced_mnem == "AND" and print_operand(ea, 2)[0] == "#":
+                mask = get_operand_value(ea, 2)
+                bits = extract_bits(fields, ((~mask) & ((1 << (register_size(print_operand(ea, 0)) * 8)) - 1)))
                 set_cmt(ea, cmt_formatter[cmt_type or reduced_mnem](bits), 0)
-            elif reduced_mnem == "BIC" and is_general_register(print_operand(ea, 2)):
-                return backtrack_fields(ea, print_operand(ea, 2), fields, (cmt_type or reduced_mnem))
+                reg1 = print_operand(ea, 1)
+                if not is_same_register(reg1, reg):
+                    backtrack_fields(ea, reg1, fields, (cmt_type or reduced_mnem))
+                    break
             else:
                 break
         elif backtrack_can_skip_insn(ea, reg):
