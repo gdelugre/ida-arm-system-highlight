@@ -1948,7 +1948,7 @@ def backtrack_fields(ea, reg, fields, cmt_type = None):
             #
             # MOV Rd, Rn
             #
-            elif reduced_mnem == "MOV" is is_general_register(print_operand(ea, 1)):
+            elif reduced_mnem == "MOV" and is_general_register(print_operand(ea, 1)):
                 backtrack_fields(ea, print_operand(ea, 1), fields, (cmt_type or reduced_mnem))
                 break
             #
