@@ -64,7 +64,7 @@ SYSTEM_INSN = (
 
 # 64 bits registers accessible from AArch32.
 # Extracted from the XML specifications for v8.7-A (2021-06).
-COPROC_REGISTERS_64 = {
+AARCH32_COPROC_REGISTERS_64 = {
         # MMU registers
         ( "p15", 0, "c2"  )           : ( "TTBR0", "Translation Table Base Register 0" ),
         ( "p15", 1, "c2"  )           : ( "TTBR1", "Translation Table Base Register 1" ),
@@ -129,7 +129,7 @@ COPROC_REGISTERS_64 = {
 }
 
 # Extracted from the XML specifications for v8.7-A (2021-06).
-COPROC_REGISTERS = {
+AARCH32_COPROC_REGISTERS = {
         ( "p15", "c0", 0, "c0", 0 )   : ( "MIDR", "Main ID Register" ),
         ( "p15", "c0", 0, "c0", 1 )   : ( "CTR", "Cache Type Register" ),
         ( "p15", "c0", 0, "c0", 2 )   : ( "TCMTR", "TCM Type Register" ),
@@ -758,7 +758,7 @@ COPROC_REGISTERS = {
 
 # Aarch64 system registers.
 # Extracted from the XML specifications for v8.7-A (2021-06).
-SYSTEM_REGISTERS = {
+AARCH64_SYSTEM_REGISTERS = {
         # Special purpose registers.
         ( 0b011, 0b000, "c4", "c2", 0b010 )   : ( "CurrentEL", "Current Exception Level" ),
         ( 0b011, 0b011, "c4", "c2", 0b001 )   : ( "DAIF", "Interrupt Mask Bits" ),
@@ -1399,8 +1399,138 @@ SYSTEM_REGISTERS = {
         ( 0b011, 0b000, "c12", "c11", 0b011 ) : ( "ICV_RPR_EL1", "Interrupt Controller Virtual Running Priority Register" ),
 }
 
+# Aarch64 system co-processor registers.
+AARCH64_SYSTEM_COPROC_REGISTERS = {
+        ( 4, "c7", "c8", 6 )     : ( "AT S12E0R", "Address Translate Stages 1 and 2 EL0 Read" ),
+        ( 4, "c7", "c8", 7 )     : ( "AT S12E0W", "Address Translate Stages 1 and 2 EL0 Write" ),
+        ( 4, "c7", "c8", 4 )     : ( "AT S12E1R", "Address Translate Stages 1 and 2 EL1 Read" ),
+        ( 4, "c7", "c8", 5 )     : ( "AT S12E1W", "Address Translate Stages 1 and 2 EL1 Write" ),
+        ( 0, "c7", "c8", 2 )     : ( "AT S1E0R", "Address Translate Stage 1 EL0 Read" ),
+        ( 0, "c7", "c8", 3 )     : ( "AT S1E0W", "Address Translate Stage 1 EL0 Write" ),
+        ( 0, "c7", "c8", 0 )     : ( "AT S1E1R", "Address Translate Stage 1 EL1 Read" ),
+        ( 0, "c7", "c9", 0 )     : ( "AT S1E1RP", "Address Translate Stage 1 EL1 Read PAN" ),
+        ( 0, "c7", "c8", 1 )     : ( "AT S1E1W", "Address Translate Stage 1 EL1 Write" ),
+        ( 0, "c7", "c9", 1 )     : ( "AT S1E1WP", "Address Translate Stage 1 EL1 Write PAN" ),
+        ( 4, "c7", "c8", 0 )     : ( "AT S1E2R", "Address Translate Stage 1 EL2 Read" ),
+        ( 4, "c7", "c8", 1 )     : ( "AT S1E2W", "Address Translate Stage 1 EL2 Write" ),
+        ( 6, "c7", "c8", 0 )     : ( "AT S1E3R", "Address Translate Stage 1 EL3 Read" ),
+        ( 6, "c7", "c8", 1 )     : ( "AT S1E3W", "Address Translate Stage 1 EL3 Write" ),
+        ( 3, "c7", "c3", 4 )     : ( "CFP RCTX", "Control Flow Prediction Restriction by Context" ),
+        ( 3, "c7", "c3", 7 )     : ( "CPP RCTX", "Cache Prefetch Prediction Restriction by Context" ),
+        ( 0, "c7", "c10", 6 )    : ( "DC CGDSW", "Clean of Data and Allocation Tags by Set/Way" ),
+        ( 3, "c7", "c10", 5 )    : ( "DC CGDVAC", "Clean of Data and Allocation Tags by VA to PoC" ),
+        ( 3, "c7", "c13", 5 )    : ( "DC CGDVADP", "Clean of Data and Allocation Tags by VA to PoDP" ),
+        ( 3, "c7", "c12", 5 )    : ( "DC CGDVAP", "Clean of Data and Allocation Tags by VA to PoP" ),
+        ( 0, "c7", "c10", 4 )    : ( "DC CGSW", "Clean of Allocation Tags by Set/Way" ),
+        ( 3, "c7", "c10", 3 )    : ( "DC CGVAC", "Clean of Allocation Tags by VA to PoC" ),
+        ( 3, "c7", "c13", 3 )    : ( "DC CGVADP", "Clean of Allocation Tags by VA to PoDP" ),
+        ( 3, "c7", "c12", 3 )    : ( "DC CGVAP", "Clean of Allocation Tags by VA to PoP" ),
+        ( 0, "c7", "c14", 6 )    : ( "DC CIGDSW", "Clean and Invalidate of Data and Allocation Tags by Set/Way" ),
+        ( 3, "c7", "c14", 5 )    : ( "DC CIGDVAC", "Clean and Invalidate of Data and Allocation Tags by VA to PoC" ),
+        ( 0, "c7", "c14", 4 )    : ( "DC CIGSW", "Clean and Invalidate of Allocation Tags by Set/Way" ),
+        ( 3, "c7", "c14", 3 )    : ( "DC CIGVAC", "Clean and Invalidate of Allocation Tags by VA to PoC" ),
+        ( 0, "c7", "c14", 2 )    : ( "DC CISW", "Data or unified Cache line Clean and Invalidate by Set/Way" ),
+        ( 3, "c7", "c14", 1 )    : ( "DC CIVAC", "Data or unified Cache line Clean and Invalidate by VA to PoC" ),
+        ( 0, "c7", "c10", 2 )    : ( "DC CSW", "Data or unified Cache line Clean by Set/Way" ),
+        ( 3, "c7", "c10", 1 )    : ( "DC CVAC", "Data or unified Cache line Clean by VA to PoC" ),
+        ( 3, "c7", "c13", 1 )    : ( "DC CVADP", "Data or unified Cache line Clean by VA to PoDP" ),
+        ( 3, "c7", "c12", 1 )    : ( "DC CVAP", "Data or unified Cache line Clean by VA to PoP" ),
+        ( 3, "c7", "c11", 1 )    : ( "DC CVAU", "Data or unified Cache line Clean by VA to PoU" ),
+        ( 3, "c7", "c4", 3 )     : ( "DC GVA", "Data Cache set Allocation Tag by VA" ),
+        ( 3, "c7", "c4", 4 )     : ( "DC GZVA", "Data Cache set Allocation Tags and Zero by VA" ),
+        ( 0, "c7", "c6", 6 )     : ( "DC IGDSW", "Invalidate of Data and Allocation Tags by Set/Way" ),
+        ( 0, "c7", "c6", 5 )     : ( "DC IGDVAC", "Invalidate of Data and Allocation Tags by VA to PoC" ),
+        ( 0, "c7", "c6", 4 )     : ( "DC IGSW", "Invalidate of Allocation Tags by Set/Way" ),
+        ( 0, "c7", "c6", 3 )     : ( "DC IGVAC", "Invalidate of Allocation Tags by VA to PoC" ),
+        ( 0, "c7", "c6", 2 )     : ( "DC ISW", "Data or unified Cache line Invalidate by Set/Way" ),
+        ( 0, "c7", "c6", 1 )     : ( "DC IVAC", "Data or unified Cache line Invalidate by VA to PoC" ),
+        ( 3, "c7", "c4", 1 )     : ( "DC ZVA", "Data Cache Zero by VA" ),
+        ( 3, "c7", "c3", 5 )     : ( "DVP RCTX", "Data Value Prediction Restriction by Context" ),
+        ( 0, "c7", "c5", 0 )     : ( "IC IALLU", "Instruction Cache Invalidate All to PoU" ),
+        ( 0, "c7", "c1", 0 )     : ( "IC IALLUIS", "Instruction Cache Invalidate All to PoU, Inner Shareable" ),
+        ( 3, "c7", "c5", 1 )     : ( "IC IVAU", "Instruction Cache line Invalidate by VA to PoU" ),
+        ( 4, "c8", "c7", 4 )     : ( "TLBI ALLE1, TLBI ALLE1NXS", "TLB Invalidate All, EL1" ),
+        ( 4, "c8", "c3", 4 )     : ( "TLBI ALLE1IS, TLBI ALLE1ISNXS", "TLB Invalidate All, EL1, Inner Shareable" ),
+        ( 4, "c8", "c1", 4 )     : ( "TLBI ALLE1OS, TLBI ALLE1OSNXS", "TLB Invalidate All, EL1, Outer Shareable" ),
+        ( 4, "c8", "c7", 0 )     : ( "TLBI ALLE2, TLBI ALLE2NXS", "TLB Invalidate All, EL2" ),
+        ( 4, "c8", "c3", 0 )     : ( "TLBI ALLE2IS, TLBI ALLE2ISNXS", "TLB Invalidate All, EL2, Inner Shareable" ),
+        ( 4, "c8", "c1", 0 )     : ( "TLBI ALLE2OS, TLBI ALLE2OSNXS", "TLB Invalidate All, EL2, Outer Shareable" ),
+        ( 6, "c8", "c7", 0 )     : ( "TLBI ALLE3, TLBI ALLE3NXS", "TLB Invalidate All, EL3" ),
+        ( 6, "c8", "c3", 0 )     : ( "TLBI ALLE3IS, TLBI ALLE3ISNXS", "TLB Invalidate All, EL3, Inner Shareable" ),
+        ( 6, "c8", "c1", 0 )     : ( "TLBI ALLE3OS, TLBI ALLE3OSNXS", "TLB Invalidate All, EL3, Outer Shareable" ),
+        ( 0, "c8", "c7", 2 )     : ( "TLBI ASIDE1, TLBI ASIDE1NXS", "TLB Invalidate by ASID, EL1" ),
+        ( 0, "c8", "c3", 2 )     : ( "TLBI ASIDE1IS, TLBI ASIDE1ISNXS", "TLB Invalidate by ASID, EL1, Inner Shareable" ),
+        ( 0, "c8", "c1", 2 )     : ( "TLBI ASIDE1OS, TLBI ASIDE1OSNXS", "TLB Invalidate by ASID, EL1, Outer Shareable" ),
+        ( 4, "c8", "c4", 1 )     : ( "TLBI IPAS2E1, TLBI IPAS2E1NXS", "TLB Invalidate by Intermediate Physical Address, Stage 2, EL1" ),
+        ( 4, "c8", "c0", 1 )     : ( "TLBI IPAS2E1IS, TLBI IPAS2E1ISNXS", "TLB Invalidate by Intermediate Physical Address, Stage 2, EL1, Inner Shareable" ),
+        ( 4, "c8", "c4", 0 )     : ( "TLBI IPAS2E1OS, TLBI IPAS2E1OSNXS", "TLB Invalidate by Intermediate Physical Address, Stage 2, EL1, Outer Shareable" ),
+        ( 4, "c8", "c4", 5 )     : ( "TLBI IPAS2LE1, TLBI IPAS2LE1NXS", "TLB Invalidate by Intermediate Physical Address, Stage 2, Last level, EL1" ),
+        ( 4, "c8", "c0", 5 )     : ( "TLBI IPAS2LE1IS, TLBI IPAS2LE1ISNXS", "TLB Invalidate by Intermediate Physical Address, Stage 2, Last level, EL1, Inner Shareable" ),
+        ( 4, "c8", "c4", 4 )     : ( "TLBI IPAS2LE1OS, TLBI IPAS2LE1OSNXS", "TLB Invalidate by Intermediate Physical Address, Stage 2, Last level, EL1, Outer Shareable" ),
+        ( 4, "c8", "c4", 2 )     : ( "TLBI RIPAS2E1, TLBI RIPAS2E1NXS", "TLB Range Invalidate by Intermediate Physical Address, Stage 2, EL1" ),
+        ( 4, "c8", "c0", 2 )     : ( "TLBI RIPAS2E1IS, TLBI RIPAS2E1ISNXS", "TLB Range Invalidate by Intermediate Physical Address, Stage 2, EL1, Inner Shareable" ),
+        ( 4, "c8", "c4", 3 )     : ( "TLBI RIPAS2E1OS, TLBI RIPAS2E1OSNXS", "TLB Range Invalidate by Intermediate Physical Address, Stage 2, EL1, Outer Shareable" ),
+        ( 4, "c8", "c4", 6 )     : ( "TLBI RIPAS2LE1, TLBI RIPAS2LE1NXS", "TLB Range Invalidate by Intermediate Physical Address, Stage 2, Last level, EL1" ),
+        ( 4, "c8", "c0", 6 )     : ( "TLBI RIPAS2LE1IS, TLBI RIPAS2LE1ISNXS", "TLB Range Invalidate by Intermediate Physical Address, Stage 2, Last level, EL1, Inner Shareable" ),
+        ( 4, "c8", "c4", 7 )     : ( "TLBI RIPAS2LE1OS, TLBI RIPAS2LE1OSNXS", "TLB Range Invalidate by Intermediate Physical Address, Stage 2, Last level, EL1, Outer Shareable" ),
+        ( 0, "c8", "c6", 3 )     : ( "TLBI RVAAE1, TLBI RVAAE1NXS", "TLB Range Invalidate by VA, All ASID, EL1" ),
+        ( 0, "c8", "c2", 3 )     : ( "TLBI RVAAE1IS, TLBI RVAAE1ISNXS", "TLB Range Invalidate by VA, All ASID, EL1, Inner Shareable" ),
+        ( 0, "c8", "c5", 3 )     : ( "TLBI RVAAE1OS, TLBI RVAAE1OSNXS", "TLB Range Invalidate by VA, All ASID, EL1, Outer Shareable" ),
+        ( 0, "c8", "c6", 7 )     : ( "TLBI RVAALE1, TLBI RVAALE1NXS", "TLB Range Invalidate by VA, All ASID, Last level, EL1" ),
+        ( 0, "c8", "c2", 7 )     : ( "TLBI RVAALE1IS, TLBI RVAALE1ISNXS", "TLB Range Invalidate by VA, All ASID, Last Level, EL1, Inner Shareable" ),
+        ( 0, "c8", "c5", 7 )     : ( "TLBI RVAALE1OS, TLBI RVAALE1OSNXS", "TLB Range Invalidate by VA, All ASID, Last Level, EL1, Outer Shareable" ),
+        ( 0, "c8", "c6", 1 )     : ( "TLBI RVAE1, TLBI RVAE1NXS", "TLB Range Invalidate by VA, EL1" ),
+        ( 0, "c8", "c2", 1 )     : ( "TLBI RVAE1IS, TLBI RVAE1ISNXS", "TLB Range Invalidate by VA, EL1, Inner Shareable" ),
+        ( 0, "c8", "c5", 1 )     : ( "TLBI RVAE1OS, TLBI RVAE1OSNXS", "TLB Range Invalidate by VA, EL1, Outer Shareable" ),
+        ( 4, "c8", "c6", 1 )     : ( "TLBI RVAE2, TLBI RVAE2NXS", "TLB Range Invalidate by VA, EL2" ),
+        ( 4, "c8", "c2", 1 )     : ( "TLBI RVAE2IS, TLBI RVAE2ISNXS", "TLB Range Invalidate by VA, EL2, Inner Shareable" ),
+        ( 4, "c8", "c5", 1 )     : ( "TLBI RVAE2OS, TLBI RVAE2OSNXS", "TLB Range Invalidate by VA, EL2, Outer Shareable" ),
+        ( 6, "c8", "c6", 1 )     : ( "TLBI RVAE3, TLBI RVAE3NXS", "TLB Range Invalidate by VA, EL3" ),
+        ( 6, "c8", "c2", 1 )     : ( "TLBI RVAE3IS, TLBI RVAE3ISNXS", "TLB Range Invalidate by VA, EL3, Inner Shareable" ),
+        ( 6, "c8", "c5", 1 )     : ( "TLBI RVAE3OS, TLBI RVAE3OSNXS", "TLB Range Invalidate by VA, EL3, Outer Shareable" ),
+        ( 0, "c8", "c6", 5 )     : ( "TLBI RVALE1, TLBI RVALE1NXS", "TLB Range Invalidate by VA, Last level, EL1" ),
+        ( 0, "c8", "c2", 5 )     : ( "TLBI RVALE1IS, TLBI RVALE1ISNXS", "TLB Range Invalidate by VA, Last level, EL1, Inner Shareable" ),
+        ( 0, "c8", "c5", 5 )     : ( "TLBI RVALE1OS, TLBI RVALE1OSNXS", "TLB Range Invalidate by VA, Last level, EL1, Outer Shareable" ),
+        ( 4, "c8", "c6", 5 )     : ( "TLBI RVALE2, TLBI RVALE2NXS", "TLB Range Invalidate by VA, Last level, EL2" ),
+        ( 4, "c8", "c2", 5 )     : ( "TLBI RVALE2IS, TLBI RVALE2ISNXS", "TLB Range Invalidate by VA, Last level, EL2, Inner Shareable" ),
+        ( 4, "c8", "c5", 5 )     : ( "TLBI RVALE2OS, TLBI RVALE2OSNXS", "TLB Range Invalidate by VA, Last level, EL2, Outer Shareable" ),
+        ( 6, "c8", "c6", 5 )     : ( "TLBI RVALE3, TLBI RVALE3NXS", "TLB Range Invalidate by VA, Last level, EL3" ),
+        ( 6, "c8", "c2", 5 )     : ( "TLBI RVALE3IS, TLBI RVALE3ISNXS", "TLB Range Invalidate by VA, Last level, EL3, Inner Shareable" ),
+        ( 6, "c8", "c5", 5 )     : ( "TLBI RVALE3OS, TLBI RVALE3OSNXS", "TLB Range Invalidate by VA, Last level, EL3, Outer Shareable" ),
+        ( 0, "c8", "c7", 3 )     : ( "TLBI VAAE1, TLBI VAAE1NXS", "TLB Invalidate by VA, All ASID, EL1" ),
+        ( 0, "c8", "c3", 3 )     : ( "TLBI VAAE1IS, TLBI VAAE1ISNXS", "TLB Invalidate by VA, All ASID, EL1, Inner Shareable" ),
+        ( 0, "c8", "c1", 3 )     : ( "TLBI VAAE1OS, TLBI VAAE1OSNXS", "TLB Invalidate by VA, All ASID, EL1, Outer Shareable" ),
+        ( 0, "c8", "c7", 7 )     : ( "TLBI VAALE1, TLBI VAALE1NXS", "TLB Invalidate by VA, All ASID, Last level, EL1" ),
+        ( 0, "c8", "c3", 7 )     : ( "TLBI VAALE1IS, TLBI VAALE1ISNXS", "TLB Invalidate by VA, All ASID, Last Level, EL1, Inner Shareable" ),
+        ( 0, "c8", "c1", 7 )     : ( "TLBI VAALE1OS, TLBI VAALE1OSNXS", "TLB Invalidate by VA, All ASID, Last Level, EL1, Outer Shareable" ),
+        ( 0, "c8", "c7", 1 )     : ( "TLBI VAE1, TLBI VAE1NXS", "TLB Invalidate by VA, EL1" ),
+        ( 0, "c8", "c3", 1 )     : ( "TLBI VAE1IS, TLBI VAE1ISNXS", "TLB Invalidate by VA, EL1, Inner Shareable" ),
+        ( 0, "c8", "c1", 1 )     : ( "TLBI VAE1OS, TLBI VAE1OSNXS", "TLB Invalidate by VA, EL1, Outer Shareable" ),
+        ( 4, "c8", "c7", 1 )     : ( "TLBI VAE2, TLBI VAE2NXS", "TLB Invalidate by VA, EL2" ),
+        ( 4, "c8", "c3", 1 )     : ( "TLBI VAE2IS, TLBI VAE2ISNXS", "TLB Invalidate by VA, EL2, Inner Shareable" ),
+        ( 4, "c8", "c1", 1 )     : ( "TLBI VAE2OS, TLBI VAE2OSNXS", "TLB Invalidate by VA, EL2, Outer Shareable" ),
+        ( 6, "c8", "c7", 1 )     : ( "TLBI VAE3, TLBI VAE3NXS", "TLB Invalidate by VA, EL3" ),
+        ( 6, "c8", "c3", 1 )     : ( "TLBI VAE3IS, TLBI VAE3ISNXS", "TLB Invalidate by VA, EL3, Inner Shareable" ),
+        ( 6, "c8", "c1", 1 )     : ( "TLBI VAE3OS, TLBI VAE3OSNXS", "TLB Invalidate by VA, EL3, Outer Shareable" ),
+        ( 0, "c8", "c7", 5 )     : ( "TLBI VALE1, TLBI VALE1NXS", "TLB Invalidate by VA, Last level, EL1" ),
+        ( 0, "c8", "c3", 5 )     : ( "TLBI VALE1IS, TLBI VALE1ISNXS", "TLB Invalidate by VA, Last level, EL1, Inner Shareable" ),
+        ( 0, "c8", "c1", 5 )     : ( "TLBI VALE1OS, TLBI VALE1OSNXS", "TLB Invalidate by VA, Last level, EL1, Outer Shareable" ),
+        ( 4, "c8", "c7", 5 )     : ( "TLBI VALE2, TLBI VALE2NXS", "TLB Invalidate by VA, Last level, EL2" ),
+        ( 4, "c8", "c3", 5 )     : ( "TLBI VALE2IS, TLBI VALE2ISNXS", "TLB Invalidate by VA, Last level, EL2, Inner Shareable" ),
+        ( 4, "c8", "c1", 5 )     : ( "TLBI VALE2OS, TLBI VALE2OSNXS", "TLB Invalidate by VA, Last level, EL2, Outer Shareable" ),
+        ( 6, "c8", "c7", 5 )     : ( "TLBI VALE3, TLBI VALE3NXS", "TLB Invalidate by VA, Last level, EL3" ),
+        ( 6, "c8", "c3", 5 )     : ( "TLBI VALE3IS, TLBI VALE3ISNXS", "TLB Invalidate by VA, Last level, EL3, Inner Shareable" ),
+        ( 6, "c8", "c1", 5 )     : ( "TLBI VALE3OS, TLBI VALE3OSNXS", "TLB Invalidate by VA, Last level, EL3, Outer Shareable" ),
+        ( 0, "c8", "c7", 0 )     : ( "TLBI VMALLE1, TLBI VMALLE1NXS", "TLB Invalidate by VMID, All at stage 1, EL1" ),
+        ( 0, "c8", "c3", 0 )     : ( "TLBI VMALLE1IS, TLBI VMALLE1ISNXS", "TLB Invalidate by VMID, All at stage 1, EL1, Inner Shareable" ),
+        ( 0, "c8", "c1", 0 )     : ( "TLBI VMALLE1OS, TLBI VMALLE1OSNXS", "TLB Invalidate by VMID, All at stage 1, EL1, Outer Shareable" ),
+        ( 4, "c8", "c7", 6 )     : ( "TLBI VMALLS12E1, TLBI VMALLS12E1NXS", "TLB Invalidate by VMID, All at Stage 1 and 2, EL1" ),
+        ( 4, "c8", "c3", 6 )     : ( "TLBI VMALLS12E1IS, TLBI VMALLS12E1ISNXS", "TLB Invalidate by VMID, All at Stage 1 and 2, EL1, Inner Shareable" ),
+        ( 4, "c8", "c1", 6 )     : ( "TLBI VMALLS12E1OS, TLBI VMALLS12E1OSNXS", "TLB Invalidate by VMID, All at Stage 1 and 2, EL1, Outer Shareable" ),
+}
+
 # Aarch32 fields.
-COPROC_FIELDS = {
+AARCH32_COPROC_FIELDS = {
         "FPSCR" : {
             0 : ( "IOC", "Invalid Operation exception" ),
             1 : ( "DZC", "Division by Zero exception" ),
@@ -1541,7 +1671,7 @@ COPROC_FIELDS = {
 }
 
 # Aarch64 fields.
-SYSREG_FIELDS = {
+AARCH64_SYSREG_FIELDS = {
         "CurrentEL" : {
             (2, 2) : ( "EL", "Current Exception Level" )
         },
@@ -2044,7 +2174,7 @@ def markup_coproc_reg64_insn(ea):
     reg1, reg2, crm = print_operand(ea, 1).split(',')
 
     sig = ( cp, op1, crm )
-    identify_register(ea, access, sig, COPROC_REGISTERS_64)
+    identify_register(ea, access, sig, AARCH32_COPROC_REGISTERS_64)
 
 def markup_coproc_insn(ea):
     if print_insn_mnem(ea)[1] == "R":
@@ -2056,7 +2186,7 @@ def markup_coproc_insn(ea):
     cp = "p%d" % DecodeInstruction(ea).Op1.specflag1
 
     sig = ( cp, crn, op1, crm, op2 )
-    identify_register(ea, access, sig, COPROC_REGISTERS, reg, COPROC_FIELDS)
+    identify_register(ea, access, sig, AARCH32_COPROC_REGISTERS, reg, AARCH32_COPROC_FIELDS)
 
 def markup_aarch64_sys_insn(ea):
     if print_insn_mnem(ea)[1] == "R":
@@ -2072,7 +2202,22 @@ def markup_aarch64_sys_insn(ea):
     reg = print_operand(ea, reg_pos)
 
     sig = ( op0, op1, crn, crm, op2 )
-    identify_register(ea, access, sig, SYSTEM_REGISTERS, reg, SYSREG_FIELDS)
+    identify_register(ea, access, sig, AARCH64_SYSTEM_REGISTERS, reg, AARCH64_SYSREG_FIELDS)
+
+def markup_aarch64_sys_coproc_insn(ea):
+    if print_insn_mnem(ea) == "SYSL":
+        access = '<'
+        reg_pos = 0
+    else:
+        access = '>'
+        reg_pos = 4
+    base_args = (reg_pos + 1) % 5
+    op1, op2 = get_operand_value(ea, base_args), get_operand_value(ea, base_args + 3)
+    crn, crm = print_operand(ea, base_args + 1), print_operand(ea, base_args + 2)
+    reg = print_operand(ea, reg_pos)
+
+    sig = ( op1, crn, crm, op2 )
+    identify_register(ea, access, sig, AARCH64_SYSTEM_COPROC_REGISTERS, reg)
 
 def markup_psr_insn(ea):
     if print_operand(ea,1)[0] == "#": # immediate
@@ -2110,6 +2255,8 @@ def markup_system_insn(ea):
         markup_pstate_insn(ea)
     elif current_arch == 'aarch64' and mnem[0:3] in ("MSR", "MRS"):
         markup_aarch64_sys_insn(ea)
+    elif current_arch == 'aarch64' and mnem[0:3] == "SYS":
+        markup_aarch64_sys_coproc_insn(ea)
     set_color(ea, CIC_ITEM, 0x00000000) # Black background, adjust to your own theme
 
 def current_arch_size():
