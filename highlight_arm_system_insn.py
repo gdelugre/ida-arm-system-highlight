@@ -1415,7 +1415,8 @@ COPROC_FIELDS = {
             12 : ( "IXE", "Inexact floating-point exception" ),
             15 : ( "IDE", "Input Denormal floating-point exception" ),
             19 : ( "FZ16", "Flush-to-zero mode on half-precision instructions" ),
-            # 22-23: RMode
+            (20, 2) : ( "Stride", "Stride" ),
+            (22, 2) : ( "RMode", "Rounding Mode control field" ),
             24 : ( "FZ", "Flush-to-zero mode" ),
             25 : ( "DN", "Default NaN mode" ),
             26 : ( "AHP", "Alternative Half-Precision" ),
