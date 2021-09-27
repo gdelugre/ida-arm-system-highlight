@@ -1963,6 +1963,16 @@ AARCH64_SYSREG_FIELDS = {
             28      :  ( "IDC", "Data cache clean requirements for instruction to data coherence" ),
             29      :  ( "DIC", "Instruction cache invalidation requirements for data to instruction coherence" ),
             (32, 6) :  ( "TminLine", "Tag minimum Line" ),
+        },
+        "MAIR_EL1" : {
+            (0, 8)  :  ( "Attr0", "Attribute index 0" ),
+            (8, 8) :   ( "Attr1", "Attribute index 1" ),
+            (16, 8) :  ( "Attr2", "Attribute index 2" ),
+            (24, 8) :  ( "Attr3", "Attribute index 3" ),
+            (32, 8) :  ( "Attr4", "Attribute index 4" ),
+            (40, 8) :  ( "Attr5", "Attribute index 5" ),
+            (48, 8) :  ( "Attr6", "Attribute index 6" ),
+            (56, 8) :  ( "Attr7", "Attribute index 7" )
         }
 }
 
@@ -1983,8 +1993,23 @@ PSTATE_OPS = {
         0b111   : "DAIFClr"
 }
 
-def extract_bits(bitmap, value):
-    return (bitmap[b] for b in bitmap if (isinstance(b, int) and value & (1 << b)) or (isinstance(b, tuple) and value & (((1 << b[1])-1) << b[0])))
+def extract_fields(bitmap, value, get_values=False):
+    for b in bitmap.keys():
+        if isinstance(b, int) and value & (1 << b):
+            yield(bitmap[b])
+        elif isinstance(b, tuple):
+            mask = ((1 << b[1])-1) << b[0]
+            if value & mask:
+                if not get_values:
+                    yield(bitmap[b])
+                else:
+                    yield(f"{bitmap[b][0]}={(value & mask) >> b[0]}", bitmap[b][1])
+
+def extract_test_fields(bitmap, value):
+    return (field for field in extract_fields(bitmap, value, False))
+
+def extract_set_fields(bitmap, value):
+    return (field for field in extract_fields(bitmap, value, True))
 
 def find_bitfield(bitmap, offset, width):
     if width > 1:
@@ -2009,6 +2034,9 @@ def is_same_register(reg0, reg1):
 def backtrack_can_skip_insn(ea, reg):
     mnem = print_insn_mnem(ea)
     if mnem in ("NOP", "ISB", "DSB", "DMB", "MSR", "MCR", "MCRR", "MCRR", "MCRR2", "CMP") or mnem[0:3] in ("STR", "STM"):
+        return True
+
+    if mnem[0:2] == "B.": # Skip conditional branch.
         return True
 
     if mnem[0:3] == "UBF" and not is_same_register(print_operand(ea, 0), reg):
@@ -2042,9 +2070,9 @@ def register_size(reg):
 
 def backtrack_fields(ea, reg, fields, cmt_type = None):
     cmt_formatter = {
-        "LDR": lambda bits: "Set bits %s" % ", ".join(name for (name, desc) in bits),
-        "MOV": lambda bits: "Set bits %s" % ", ".join(name for (name, desc) in bits),
-        "ORR": lambda bits: "Set bit %s" % ", ".join(desc for (name, desc) in bits),
+        "LDR": lambda bits: "Set bits %s" % ", ".join(f"{name} ({desc})" for (name, desc) in bits),
+        "MOV": lambda bits: "Set bits %s" % ", ".join(f"{name} ({desc})" for (name, desc) in bits),
+        "ORR": lambda bits: "Set bit %s" % ", ".join(name for (name, desc) in bits),
         "BIC": lambda bits: "Clear bit %s" % ", ".join(desc for (name, desc) in bits),
         "AND": lambda bits: "Clear bit %s" % ", \n".join(desc for (name, desc) in bits),
     }
@@ -2059,20 +2087,20 @@ def backtrack_fields(ea, reg, fields, cmt_type = None):
             # LDR Rd, =imm
             #
             if reduced_mnem == "LDR" and print_operand(ea, 1)[0] == "=":
-                bits = extract_bits(fields, get_wide_dword(get_operand_value(ea, 1)))
+                bits = extract_set_fields(fields, get_wide_dword(get_operand_value(ea, 1)))
                 set_cmt(ea, cmt_formatter[cmt_type or reduced_mnem](bits), 0)
                 break
             #
             # MOVK Rd, #imm,LSL#shift
             #
             elif mnem == "MOVK":
-                bits = extract_bits(fields, movk_operand_value(ea))
+                bits = extract_set_fields(fields, movk_operand_value(ea))
                 set_cmt(ea, cmt_formatter[cmt_type or reduced_mnem](bits), 0)
             #
             # MOV Rd, #imm
             #
             elif reduced_mnem == "MOV" and print_operand(ea, 1)[0] == "#":
-                bits = extract_bits(fields, get_operand_value(ea, 1))
+                bits = extract_set_fields(fields, get_operand_value(ea, 1))
                 set_cmt(ea, cmt_formatter[cmt_type or reduced_mnem](bits), 0)
                 break
             #
@@ -2086,7 +2114,7 @@ def backtrack_fields(ea, reg, fields, cmt_type = None):
             # BIC Rd, Rn, #imm
             #
             elif reduced_mnem == "ORR"  and print_operand(ea, 2)[0] == "#":
-                bits = extract_bits(fields, get_operand_value(ea, 2))
+                bits = extract_set_fields(fields, get_operand_value(ea, 2))
                 set_cmt(ea, cmt_formatter[cmt_type or reduced_mnem](bits), 0)
                 reg1 = print_operand(ea, 1)
                 if not is_same_register(reg1, reg):
@@ -2109,7 +2137,7 @@ def backtrack_fields(ea, reg, fields, cmt_type = None):
             #
             elif reduced_mnem == "AND" and print_operand(ea, 2)[0] == "#":
                 mask = get_operand_value(ea, 2)
-                bits = extract_bits(fields, ((~mask) & ((1 << (register_size(print_operand(ea, 0)) * 8)) - 1)))
+                bits = extract_test_fields(fields, ((~mask) & ((1 << (register_size(print_operand(ea, 0)) * 8)) - 1)))
                 set_cmt(ea, cmt_formatter[cmt_type or reduced_mnem](bits), 0)
                 reg1 = print_operand(ea, 1)
                 if not is_same_register(reg1, reg):
@@ -2126,14 +2154,14 @@ def track_fields(ea, reg, fields):
     while True:
         ea += get_item_size(ea)
         next_mnem = print_insn_mnem(ea)
-        if next_mnem[0:3] in ("TST", "TEQ") and is_same_register(print_operand(ea, 0), reg) and print_operand(ea, 1)[0] == "#":
-            bits = extract_bits(fields, get_operand_value(ea, 1))
-            set_cmt(ea, "Test field %s" % ", ".join(desc for (name, desc) in bits), 0)
+        if next_mnem[0:3] in ("TST", "TEQ", "CMP") and is_same_register(print_operand(ea, 0), reg) and print_operand(ea, 1)[0] == "#":
+            bits = extract_set_fields(fields, get_operand_value(ea, 1))
+            set_cmt(ea, "Test field %s" % ", ".join(name for (name, desc) in bits), 0)
         elif next_mnem[0:3] == "AND" and is_same_register(print_operand(ea, 1), reg) and print_operand(ea, 2)[0] == "#":
-            bits = extract_bits(fields, get_operand_value(ea, 2))
+            bits = extract_test_fields(fields, get_operand_value(ea, 2))
             set_cmt(ea, "Field %s" % ", ".join(desc for (name, desc) in bits), 0)
         elif next_mnem[0:3] == "LSL" and GetDisasm(ea)[3] == "S" and is_same_register(print_operand(ea, 1), reg) and print_operand(ea, 2)[0] == "#":
-            bits = extract_bits(fields, 1 << (31 - get_operand_value(ea, 2)))
+            bits = extract_test_fields(fields, 1 << (31 - get_operand_value(ea, 2)))
             set_cmt(ea, "Test bit %s" % ", ".join(desc for (name, desc) in bits), 0)
         elif next_mnem == "UBFX" and is_same_register(print_operand(ea, 1), reg):
             lsb = get_operand_value(ea, 2)
