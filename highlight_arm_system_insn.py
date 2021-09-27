@@ -12,6 +12,29 @@ from idc import *
 from idautils import *
 
 global current_arch
+global summary_info
+
+summary_info = {
+    "Page table": set(),
+    "Interrupt vectors": set(),
+    "Return from interrupt": set(),
+    "System calls": set(),
+    "Cryptography": set(),
+}
+
+CRYPTO_INSN = (
+    "AESE", "AESMC", "AESD",
+    "BCAX", "EOR3", "RAX1", "XAR",
+    "SHA1C", "SHA1H", "SHA1M", "SHA1P", "SHA1SU0", "SHA1SU1",
+    "SHA256H2", "SHA256H", "SHA256SU0", "SHA256SU1",
+    "SHA512H2", "SHA512H", "SHA512SU0", "SHA512SU1",
+    "SM3PARTW1", "SM3PARTW2", "SM3SS1", "SM3TT1A", "SM3TT1B", "SM3TT2A", "SM3TT2B",
+    "SM4E", "SM4EKEY"
+)
+
+SYSTEM_CALL_INSN = (
+    "SVC", "SWI", "SMC", "SMI", "HVC"
+)
 
 SYSTEM_INSN = (
     # CPSR access
@@ -35,7 +58,7 @@ SYSTEM_INSN = (
     # Exceptions generating
     "BKPT", # AArch32
     "BRK",  # AArch64
-    "SVC", "SWI", "SMC", "SMI", "HVC",
+    *SYSTEM_CALL_INSN,
 
     # Special modes
     "ENTERX", "LEAVEX", "BXJ"
@@ -53,13 +76,7 @@ SYSTEM_INSN = (
     "AUTIB", "AUTIB1716", "AUTIBSP", "AUTIBZ", "AUTIZB",
 
     # Crypto
-    "AESE", "AESMC", "AESD",
-    "BCAX", "EOR3", "RAX1", "XAR",
-    "SHA1C", "SHA1H", "SHA1M", "SHA1P", "SHA1SU0", "SHA1SU1",
-    "SHA256H2", "SHA256H", "SHA256SU0", "SHA256SU1",
-    "SHA512H2", "SHA512H", "SHA512SU0", "SHA512SU1",
-    "SM3PARTW1", "SM3PARTW2", "SM3SS1", "SM3TT1A", "SM3TT1B", "SM3TT2A", "SM3TT2B",
-    "SM4E", "SM4EKEY",
+    *CRYPTO_INSN
 )
 
 # 64 bits registers accessible from AArch32.
@@ -2017,16 +2034,15 @@ def find_bitfield(bitmap, offset, width):
     else:
         return bitmap.get(offset, None) or bitmap.get((offset, width), None)
 
+def is_interrupt_return(ea):
+    mnem = print_insn_mnem(ea)
+    return (len(mnem) > 0 and (mnem in ('ERET', 'RFE') or
+                               (mnem[0:3] == "LDM" and print_operand(ea, 1)[-1:] == "^") or
+                               (mnem[0:4] in ("SUBS", "MOVS") and print_operand(ea, 0) == "PC" and print_operand(ea, 1) == "LR") ))
+
 def is_system_insn(ea):
     mnem = print_insn_mnem(ea)
-    if len(mnem) > 0:
-        if mnem in SYSTEM_INSN:
-            return True
-        if mnem[0:3] == "LDM" and print_operand(ea, 1)[-1:] == "^":
-            return True
-        if mnem[0:4] in ("SUBS", "MOVS") and print_operand(ea, 0) == "PC" and print_operand(ea, 1) == "LR":
-            return True
-    return False
+    return len(mnem) > 0 and ((mnem in SYSTEM_INSN) or is_interrupt_return(ea))
 
 def is_same_register(reg0, reg1):
     return (reg0 == reg1) or (current_arch == 'aarch64' and reg0[1:] == reg1[1:] and ((reg0[0] == 'W' and reg1[0] == 'X') or (reg0[0] == 'X' and reg1[0] == 'W')))
@@ -2174,14 +2190,22 @@ def track_fields(ea, reg, fields):
         else:
             break
 
+def save_summary_info(ea, reg_name):
+    if reg_name[0:4] == 'TTBR':
+        summary_info['Page table'].add(ea)
+    elif reg_name[0:4] == 'VBAR' or reg_name[1:5] == 'VBAR':
+        summary_info['Interrupt vectors'].add(ea)
+
 def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields = {}):
     desc = known_regs.get(sig, None)
     if desc:
         cmt = ("[%s] " + "\n or ".join(["%s (%s)"] * (len(desc) // 2))) % ((access,) + desc)
         set_cmt(ea, cmt, 0)
-        print(cmt)
+        print("%x: %s" % (ea, cmt))
 
-        # Try to resolve fields during a write operation.
+        save_summary_info(ea, desc[0])
+
+        # Try to resolve fields during a write or test operation.
         fields = known_fields.get(desc[0], None)
         if fields and len(desc) == 2:
             if access == '>':
@@ -2189,7 +2213,7 @@ def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields 
             else:
                 track_fields(ea, cpu_reg, fields)
     else:
-        print("Cannot identify system register.")
+        print("%x: Cannot identify system register." % ea)
         set_cmt(ea, "[%s] Unknown system register." % access, 0)
 
 def markup_coproc_reg64_insn(ea):
@@ -2285,17 +2309,33 @@ def markup_system_insn(ea):
         markup_aarch64_sys_insn(ea)
     elif current_arch == 'aarch64' and mnem[0:3] == "SYS":
         markup_aarch64_sys_coproc_insn(ea)
+
+    if is_interrupt_return(ea):
+        summary_info["Return from interrupt"].add(ea)
+    if mnem in SYSTEM_CALL_INSN:
+        summary_info["System calls"].add(ea)
+    elif mnem in CRYPTO_INSN:
+        func = get_func_name(ea)
+        summary_info["Cryptography"].add(func if len(func) > 0 else ea)
+
     set_color(ea, CIC_ITEM, 0x00000000) # Black background, adjust to your own theme
 
 def current_arch_size():
     _, t, _ = parse_decl("void *", 0)
     return SizeOf(t) * 8
 
+def print_summary():
+    print("SUMMARY:")
+    for category, addrs in summary_info.items():
+        if len(addrs) == 0:
+            continue
+        print("  {:<24}: {}".format(category, ", ".join(hex(addr) if isinstance(addr, int) else addr for addr in addrs)))
+
 def run_script():
     for addr in Heads():
         if is_system_insn(addr):
-            print("Found system instruction %s at %08x" % ( print_insn_mnem(addr), addr ))
             markup_system_insn(addr)
+    print_summary()
 
 #
 # Check we are running this script on an ARM architecture.
