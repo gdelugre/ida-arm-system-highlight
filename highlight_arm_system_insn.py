@@ -2010,6 +2010,20 @@ PSTATE_OPS = {
         0b111   : "DAIFClr"
 }
 
+def function_name_or_address(ea):
+    func = get_func_name(ea)
+    return func if len(func) > 0 else ea
+
+def function_offset_or_address(ea):
+    func_name = get_func_name(ea)
+    if len(func_name) == 0:
+        return ea
+    start_ea = get_func_attr(ea, FUNCATTR_START)
+    off = ea - start_ea
+    if off < 0:
+        return ea
+    return f"{func_name}+{off:x}"
+
 def extract_fields(bitmap, value, get_values=False):
     for b in bitmap.keys():
         if isinstance(b, int) and value & (1 << b):
@@ -2192,9 +2206,9 @@ def track_fields(ea, reg, fields):
 
 def save_summary_info(ea, reg_name):
     if reg_name[0:4] == 'TTBR':
-        summary_info['Page table'].add(ea)
+        summary_info['Page table'].add(function_offset_or_address(ea))
     elif reg_name[0:4] == 'VBAR' or reg_name[1:5] == 'VBAR':
-        summary_info['Interrupt vectors'].add(ea)
+        summary_info['Interrupt vectors'].add(function_offset_or_address(ea))
 
 def identify_register(ea, access, sig, known_regs, cpu_reg = None, known_fields = {}):
     desc = known_regs.get(sig, None)
@@ -2311,12 +2325,11 @@ def markup_system_insn(ea):
         markup_aarch64_sys_coproc_insn(ea)
 
     if is_interrupt_return(ea):
-        summary_info["Return from interrupt"].add(ea)
+        summary_info["Return from interrupt"].add(function_offset_or_address(ea));
     if mnem in SYSTEM_CALL_INSN:
-        summary_info["System calls"].add(ea)
+        summary_info["System calls"].add(function_offset_or_address(ea))
     elif mnem in CRYPTO_INSN:
-        func = get_func_name(ea)
-        summary_info["Cryptography"].add(func if len(func) > 0 else ea)
+        summary_info["Cryptography"].add(function_name_or_address(ea))
 
     set_color(ea, CIC_ITEM, 0x00000000) # Black background, adjust to your own theme
 
