@@ -2114,7 +2114,7 @@ def function_offset_or_address(ea):
     off = ea - start_ea
     if off < 0:
         return ea
-    return f"{func_name}+{off:x}"
+    return "{}+{}".format(func_name, hex(off))
 
 def extract_fields(bitmap, value, get_values=False):
     for b in bitmap.keys():
@@ -2126,7 +2126,7 @@ def extract_fields(bitmap, value, get_values=False):
                 if not get_values:
                     yield(bitmap[b])
                 else:
-                    yield(f"{bitmap[b][0]}={(value & mask) >> b[0]}", bitmap[b][1])
+                    yield("{}={}".format(bitmap[b][0], (value & mask) >> b[0]), bitmap[b][1])
 
 def extract_test_fields(bitmap, value):
     return (field for field in extract_fields(bitmap, value, False))
