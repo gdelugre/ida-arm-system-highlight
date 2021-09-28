@@ -2164,7 +2164,7 @@ def backtrack_can_skip_insn(ea, reg):
     if mnem[0:3] == "UBF" and not is_same_register(print_operand(ea, 0), reg):
         return True
 
-    if mnem in ("LDR", "MRS", "ORR", "AND", "EOR", "BIC", "MOV", "MOVK", "LSR", "LSL", "ADD", "SUB") and not is_same_register(print_operand(ea, 0), reg):
+    if mnem in ("LDR", "MRS", "ORR", "AND", "EOR", "BIC", "MOV", "MOVK", "MOVT", "LSR", "LSL", "ADD", "SUB") and not is_same_register(print_operand(ea, 0), reg):
         return True
 
     return False
@@ -2181,6 +2181,10 @@ def movk_operand_value(ea):
     imm = get_operand_value(ea, 1)
     shift = int(print_operand(ea, 1).split(',')[1][4:])
     return imm << shift
+
+def movt_operand_value(ea):
+    imm = get_operand_value(ea, 1)
+    return imm << 16
 
 def register_size(reg):
     if not is_general_register(reg):
@@ -2218,6 +2222,13 @@ def backtrack_fields(ea, reg, fields, cmt_type = None):
             #
             elif mnem == "MOVK":
                 bits = extract_set_fields(fields, movk_operand_value(ea))
+                if len(bits) > 0:
+                    set_cmt(ea, cmt_formatter[cmt_type or reduced_mnem](bits), 0)
+            #
+            # MOVT Rd, #imm
+            #
+            elif mnem == "MOVT":
+                bits = extract_set_fields(fields, movt_operand_value(ea))
                 if len(bits) > 0:
                     set_cmt(ea, cmt_formatter[cmt_type or reduced_mnem](bits), 0)
             #
