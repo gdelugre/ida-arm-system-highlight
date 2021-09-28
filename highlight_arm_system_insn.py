@@ -1548,6 +1548,98 @@ AARCH64_SYSTEM_COPROC_REGISTERS = {
 
 # Aarch32 fields.
 AARCH32_COPROC_FIELDS = {
+        "DACR" : {
+            (0, 2) : ("D0", "Domain 0"),
+            (2, 2) : ("D1", "Domain 1"),
+            (4, 2) : ("D2", "Domain 2"),
+            (6, 2) : ("D3", "Domain 3"),
+            (8, 2) : ("D4", "Domain 4"),
+            (10, 2) : ("D5", "Domain 5"),
+            (12, 2) : ("D6", "Domain 6"),
+            (14, 2) : ("D7", "Domain 7"),
+            (16, 2) : ("D8", "Domain 8"),
+            (18, 2) : ("D9", "Domain 9"),
+            (20, 2) : ("D10", "Domain 10"),
+            (22, 2) : ("D11", "Domain 11"),
+            (24, 2) : ("D12", "Domain 12"),
+            (26, 2) : ("D13", "Domain 13"),
+            (28, 2) : ("D14", "Domain 14"),
+            (30, 2) : ("D15", "Domain 15"),
+        },
+        "MIDR" : {
+            (0, 3)  : ( "Revision", "Revision number" ),
+            (4, 12) : ( "PartNum", "Primary Part Number" ),
+            (16, 4) : ( "Architecture", "Architecture version" ),
+            (20, 4) : ( "Variant", "Variant number" ),
+            (24, 8) : ( "Implementer", "Implementer code" )
+        },
+        "ID_ISAR0" : {
+            (0, 4)  : ( "Swap", "Swap instructions" ),
+            (4, 4)  : ( "BitCount", "Bit Counting instructions" ),
+            (8, 4)  : ( "BitField", "BitField instructions" ),
+            (12, 4) : ( "CmpBranch", "Compare and Branch instructions" ),
+            (16, 4) : ( "Coproc", "System register access instructions" ),
+            (20, 4) : ( "Debug", "Debug instructions" ),
+            (24, 4) : ( "Divide", "Divide instructions" )
+        },
+        "ID_ISAR1" : {
+            (0, 4)  : ( "Endian", "SETEND instruction" ),
+            (4, 4)  : ( "Except", "Exception-handling instructions" ),
+            (8, 4)  : ( "Except_AR", "A and R-profile exception handling instructions" ),
+            (12, 4) : ( "Extend", "Extend instructions" ),
+            (16, 4) : ( "IfThen", "If-Then instructions" ),
+            (20, 4) : ( "Immediate", "Long immediate instructions" ),
+            (24, 4) : ( "Interwork", "Interworking instructions" ),
+            (28, 4) : ( "Jazelle", "Jazelle extension instructions" )
+        },
+        "ID_ISAR2" : {
+            (0, 4)  : ( "LoadStore", "Additional load/store instructions" ),
+            (4, 4)  : ( "MemHint", "Memory Hint instructions" ),
+            (8, 4)  : ( "MultiAccessInt", "Interruptible multi-access instructions" ),
+            (12, 4) : ( "Mult", "Multiply instructions" ),
+            (16, 4) : ( "MultS", "Advanced signed Multiply instructions" ),
+            (20, 4) : ( "MultU", "Advanced unsigned Multiply instructions" ),
+            (24, 4) : ( "PSR_AR", "A and R-profile instructions to manipulate the PSR" ),
+            (28, 4) : ( "Reversal", "Reversal instructions" )
+        },
+        "ID_ISAR3" : {
+            (0, 4)  : ( "Saturate", "Saturate instructions" ),
+            (4, 4)  : ( "SIMD", "SIMD instructions" ),
+            (8, 4)  : ( "SVC", "SVC instructions" ),
+            (12, 4) : ( "SyncPrim", "Synchronization Primitive instructions" ),
+            (16, 4) : ( "TabBranch", "Table Branch instructions" ),
+            (20, 4) : ( "T32Copy", "T32 non-flag setting MOV instructions" ),
+            (24, 4) : ( "TrueNOP", "true NOP instructions" ),
+            (28, 4) : ( "T32EE", "T32EE instructions" )
+        },
+        "ID_ISAR4" : {
+            (0, 4)  : ( "Unpriv", "Unprivileged instructions" ),
+            (4, 4)  : ( "WithShifts", "Instructions with shifts" ),
+            (8, 4)  : ( "Writeback", "Writeback addressing mode" ),
+            (12, 4) : ( "SMC", "SMC instructions" ),
+            (16, 4) : ( "Barrier", "Barrier instructions" ),
+            (20, 4) : ( "SyncPrim_frac", "Synchronization Primitive instructions" ),
+            (24, 4) : ( "PSR_M", "M-profile instructions to modify the PSR" ),
+            (28, 4) : ( "SWP_frac", "Bus locking for SWP and SWPB instructions" )
+        },
+        "ID_ISAR5" : {
+            (0, 4)  : ( "SEVL", "SEVL instructions" ),
+            (4, 4)  : ( "AES", "AES instructions" ),
+            (8, 4)  : ( "SHA1", "SHA1 instructions" ),
+            (12, 4) : ( "SHA2", "SHA2 instructions" ),
+            (16, 4) : ( "CRC32", "CRC32 instructions" ),
+            (24, 4) : ( "RDM", "VQRDMLAH and VQRDMLSH instructions" ),
+            (28, 4) : ( "VCMA", "VCMLA and VCADD instructions" )
+        },
+        "ID_ISAR6" : {
+            (0, 4)  : ( "JSCVT", "JavaScript conversion instruction" ),
+            (4, 4)  : ( "DP", "Dot product instructions" ),
+            (8, 4)  : ( "FHM", "VFMAL and VFMSL instructions" ),
+            (12, 4) : ( "SB", "SB instruction" ),
+            (16, 4) : ( "SPECRES", "Speculation invalidation instructions" ),
+            (20, 4) : ( "BF16", "BFloat16 instructions" ),
+            (24, 4) : ( "I8MM", "Int8 matrix multiplication instructions" ),
+        },
         "FPSCR" : {
             0 : ( "IOC", "Invalid Operation exception" ),
             1 : ( "DZC", "Division by Zero exception" ),
