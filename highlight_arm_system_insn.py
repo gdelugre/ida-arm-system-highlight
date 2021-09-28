@@ -2371,6 +2371,9 @@ def markup_coproc_insn(ea):
     sig = ( cp, crn, op1, crm, op2 )
     identify_register(ea, access, sig, AARCH32_COPROC_REGISTERS, reg, AARCH32_COPROC_FIELDS)
 
+def is_reserved_aarch64_register(sig):
+    return sig[0] == 0b11 and (sig[2] in ("c15", "c11"))
+
 def markup_aarch64_sys_insn(ea):
     if print_insn_mnem(ea)[1] == "R":
         reg_pos = 0
@@ -2385,6 +2388,15 @@ def markup_aarch64_sys_insn(ea):
     reg = print_operand(ea, reg_pos)
 
     sig = ( op0, op1, crn, crm, op2 )
+
+    if is_reserved_aarch64_register(sig):
+        name = "S3_{}_{}_{}_{}".format(op1, crn, crm, op2).upper()
+        desc = "IMPLEMENTATION DEFINED"
+        cmt = "[%s] %s (%s)" % (access, name, desc)
+        set_cmt(ea, cmt, 0)
+        print("%x: %s" % (ea, cmt))
+        return
+
     identify_register(ea, access, sig, AARCH64_SYSTEM_REGISTERS, reg, AARCH64_SYSREG_FIELDS)
 
 def markup_aarch64_sys_coproc_insn(ea):
